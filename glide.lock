@@ -1,8 +1,8 @@
 hash: be1c3fce514c86728a39eadb024ed333c7b931214b6a471672c142f8156fc382
-updated: 2018-08-14T18:02:56.316037+08:00
+updated: 2019-05-13T19:39:39.090533+08:00
 imports:
 - name: github.com/coreos/etcd
-  version: fca8add78a9d926166eb739b8e4a124434025ba3
+  version: 98d308426819d892e149fe45f6fd542464cb1f9d
   subpackages:
   - auth/authpb
   - clientv3
@@ -18,17 +18,40 @@ imports:
   - proto
   - protoc-gen-gogo/descriptor
 - name: github.com/golang/mock
-  version: c34cdb4725f4c3844d095133c6e40e448b86589b
+  version: 9fa652df1129bef0e734c9cf9bf6dbae9ef3b9fa
   subpackages:
   - gomock
 - name: github.com/golang/protobuf
-  version: b4deda0973fb4c70b50d226b1af49f3da59f5265
+  version: b5d812f8a3706043e23a9cd5babf2e5423744d30
   subpackages:
+  - jsonpb
   - proto
   - ptypes
   - ptypes/any
   - ptypes/duration
+  - ptypes/struct
   - ptypes/timestamp
+- name: github.com/grpc-ecosystem/go-grpc-middleware
+  version: cfaf5686ec79ff8344257723b6f5ba1ae0ffeb4d
+  subpackages:
+  - logging
+  - logging/logrus
+  - logging/logrus/ctxlogrus
+  - recovery
+  - tags
+  - tags/logrus
+- name: github.com/pkg/errors
+  version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
+- name: github.com/satori/go.uuid
+  version: b061729afc07e77a8aa4fad0a2fd840958f1942a
+- name: github.com/sirupsen/logrus
+  version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
+- name: golang.org/x/crypto
+  version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
+  subpackages:
+  - bcrypt
+  - blowfish
+  - ssh/terminal
 - name: golang.org/x/net
   version: 66aacef3dd8a676686c7ae3716979581e8b03c47
   subpackages:
@@ -43,6 +66,7 @@ imports:
   version: ebfc5b4631820b793c9010c87fd8fef0f39eb082
   subpackages:
   - unix
+  - windows
 - name: golang.org/x/text
   version: b19bf474d317b857955b12035d2c5acb57ce8b01
   subpackages:
@@ -55,14 +79,16 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 32fb0ac620c32ba40a4626ddf94d90d12cce3455
+  version: 25c4f928eaa6d96443009bd842389fb4fa48664e
   subpackages:
   - balancer
   - balancer/base
   - balancer/roundrobin
+  - binarylog/grpc_binarylog_v1
   - codes
   - connectivity
   - credentials
+  - credentials/internal
   - encoding
   - encoding/proto
   - examples/route_guide/mock_routeguide
@@ -71,9 +97,13 @@ imports:
   - health/grpc_health_v1
   - internal
   - internal/backoff
+  - internal/balancerload
+  - internal/binarylog
   - internal/channelz
   - internal/envconfig
   - internal/grpcrand
+  - internal/grpcsync
+  - internal/syscall
   - internal/transport
   - keepalive
   - metadata
