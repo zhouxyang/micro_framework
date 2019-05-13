@@ -13,6 +13,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	pb "google.golang.org/grpc/examples/route_guide/routeguide"
+	"google.golang.org/grpc/metadata"
 )
 
 var (
@@ -144,31 +145,27 @@ func main() {
 
 	// Looking for a valid feature
 
-	printFeature(client, &pb.Point{Latitude: 409146138, Longitude: -746188906})
+	/*printFeature(client, &pb.Point{Latitude: 409146138, Longitude: -746188906})
 	/*	// Feature missing.
 		printFeature(client, &pb.Point{Latitude: 0, Longitude: 0})
 	*/
 	// Looking for features between 40, -75 and 42, -73.
-	printFeatures(client, &pb.Rectangle{
+	/*	printFeatures(client, &pb.Rectangle{
 		Lo: &pb.Point{Latitude: 400000000, Longitude: -750000000},
 		Hi: &pb.Point{Latitude: 420000000, Longitude: -730000000},
-	})
-	/*
-		// RecordRoute
-		runRecordRoute(client)
+	})*/
 
-		// RouteChat
-		runRouteChat(client)
-	*/
+	// RecordRoute
+	runRecordRoute(client)
+
+	// RouteChat
+	runRouteChat(client)
 }
-
-type EntryKey string
-
-var entryKey EntryKey = "request_id"
 
 func UnaryClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	u1 := uuid.NewV4().String()
-	newCtx := context.WithValue(ctx, entryKey, u1)
+	md := metadata.Pairs("requestid", u1)
+	newCtx := metadata.NewOutgoingContext(ctx, md)
 	log.Printf("before invoker. method: %+v, request:%+v, requestid:%v \n %+v", method, req, u1, newCtx)
 	err := invoker(newCtx, method, req, reply, cc, opts...)
 	log.Printf("after invoker. reply: %+v", reply)
@@ -177,7 +174,8 @@ func UnaryClientInterceptor(ctx context.Context, method string, req, reply inter
 
 func StreamClientInterceptor(ctx context.Context, desc *grpc.StreamDesc, cc *grpc.ClientConn, method string, streamer grpc.Streamer, opts ...grpc.CallOption) (grpc.ClientStream, error) {
 	u1 := uuid.NewV4().String()
-	newCtx := context.WithValue(ctx, entryKey, u1)
+	md := metadata.Pairs("requestid", u1)
+	newCtx := metadata.NewOutgoingContext(ctx, md)
 	log.Printf("before invoker. method: %+v, StreamDesc:%+v, requestid:%v", method, desc, u1)
 	clientStream, err := streamer(newCtx, desc, cc, method, opts...)
 	log.Printf("before invoker. method: %+v", method)
