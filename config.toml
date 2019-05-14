@@ -1,0 +1,8 @@
+# 监听端口
+Host="0.0.0.0"
+Port=10000
+
+EtcdHost="localhost"
+EtcdPort=2379
+
+LogPath="/tmp/log/route_guide.log"

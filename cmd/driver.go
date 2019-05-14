@@ -20,11 +20,11 @@ func PutRegisterFunc(name string, driver RegisterFunc) {
 	defer serverDriversMu.Unlock()
 
 	if driver == nil {
-		panic(fmt.Sprintf("Register QueryDriver %s is nil", name))
+		panic(fmt.Sprintf("Register Driver %s is nil", name))
 	}
 
 	if _, dup := ServerDrivers[name]; dup {
-		panic(fmt.Sprintf("Register Called Twice for Query Driver %s", name))
+		panic(fmt.Sprintf("Register Called Twice for Driver %s", name))
 	}
 
 	ServerDrivers[name] = driver

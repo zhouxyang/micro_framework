@@ -3,41 +3,42 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
+
 	"github.com/coreos/etcd/clientv3"
-	etcdnaming "github.com/coreos/etcd/clientv3/naming"
-	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
-	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"os"
+
+	etcdnaming "github.com/coreos/etcd/clientv3/naming"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	grpc_requestid "route_guide/middleware/grpc_requestid"
-	"time"
 )
 
-func InitGrpcLog() *logrus.Entry {
+func InitGrpcLog(filename string) (*logrus.Entry, error) {
 	// init grpc log
-	/*LogFile := path.Join(Config.DockerInsideLogDir, path.Clean(Config.GrpcLogFile))
-	grpcLog, err := os.OpenFile(LogFile, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
+	grpcLog, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
-		fmt.Printf("open logfile failed: %v(%v)", LogFile, err)
-		os.Exit(-2)
+		werr := errors.Wrap(err, fmt.Sprintf("open logfile failed: %v", filename))
+		return nil, werr
 	}
-	*/
 	entry := logrus.New()
 	entry.Formatter = &logrus.JSONFormatter{}
-	entry.Out = os.Stdout
+	entry.Out = grpcLog
 
 	log := entry.WithFields(logrus.Fields{
 		"pid": os.Getpid(),
 	})
 
 	log.Infof("init grpclog success")
-	return log
+	return log, nil
 }
 
+// GetLog 从ctx拿到log
 func GetLog(ctx context.Context) *logrus.Entry {
 	return ctxlogrus.Extract(ctx)
 }
