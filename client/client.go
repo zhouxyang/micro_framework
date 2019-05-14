@@ -145,28 +145,27 @@ func main() {
 
 	// Looking for a valid feature
 
-	/*printFeature(client, &pb.Point{Latitude: 409146138, Longitude: -746188906})
-	/*	// Feature missing.
-		printFeature(client, &pb.Point{Latitude: 0, Longitude: 0})
-	*/
+	printFeature(client, &pb.Point{Latitude: 409146138, Longitude: -746188906})
+	// Feature missing.
+	//printFeature(client, &pb.Point{Latitude: 0, Longitude: 0})
 	// Looking for features between 40, -75 and 42, -73.
-	/*	printFeatures(client, &pb.Rectangle{
+	/*printFeatures(client, &pb.Rectangle{
 		Lo: &pb.Point{Latitude: 400000000, Longitude: -750000000},
 		Hi: &pb.Point{Latitude: 420000000, Longitude: -730000000},
-	})*/
-
+	})
+	*/
 	// RecordRoute
-	runRecordRoute(client)
+	//runRecordRoute(client)
 
 	// RouteChat
-	runRouteChat(client)
+	//runRouteChat(client)
 }
 
 func UnaryClientInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	u1 := uuid.NewV4().String()
 	md := metadata.Pairs("requestid", u1)
 	newCtx := metadata.NewOutgoingContext(ctx, md)
-	log.Printf("before invoker. method: %+v, request:%+v, requestid:%v \n %+v", method, req, u1, newCtx)
+	log.Printf("before invoker. method: %+v, request:%+v, requestid:%v", method, req, u1)
 	err := invoker(newCtx, method, req, reply, cc, opts...)
 	log.Printf("after invoker. reply: %+v", reply)
 	return err

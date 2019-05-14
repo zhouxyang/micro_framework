@@ -9,15 +9,13 @@ import (
 	"route_guide/cmd"
 	grpc_requestid "route_guide/middleware/grpc_requestid"
 	"syscall"
-	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	"github.com/coreos/etcd/clientv3"
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc/naming"
@@ -40,14 +38,9 @@ func main() {
 	start(log, lis)
 }
 func register(log *logrus.Entry) {
-	// 连接etcd集群
-	cli, err := clientv3.New(clientv3.Config{
-		// etcd集群成员节点列表
-		Endpoints:   []string{"localhost:2379"},
-		DialTimeout: 5 * time.Second,
-	})
+	cli, err := cmd.GetEtcdClient("localhost", 2379)
 	if err != nil {
-		log.Infof("[测] connect etcd err:", err)
+		log.Infof("GetEtcdClient err:", err)
 		return
 	}
 	// 创建命名解析
@@ -65,14 +58,9 @@ func register(log *logrus.Entry) {
 }
 
 func unRegister(log *logrus.Entry) {
-	// 连接etcd集群
-	cli, err := clientv3.New(clientv3.Config{
-		// etcd集群成员节点列表
-		Endpoints:   []string{"localhost:2379"},
-		DialTimeout: 5 * time.Second,
-	})
+	cli, err := cmd.GetEtcdClient("localhost", 2379)
 	if err != nil {
-		log.Infof("[测] connect etcd err:", err)
+		log.Infof("GetEtcdClient err:", err)
 		return
 	}
 	// 创建命名解析
@@ -111,7 +99,7 @@ func start(log *logrus.Entry, lis net.Listener) {
 		for s := range c {
 			unRegister(log)
 			log.Infof("Got signal: %v", s)
-			grpcServer.Stop()
+			grpcServer.GracefulStop()
 		}
 
 	}()

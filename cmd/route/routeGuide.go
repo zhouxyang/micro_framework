@@ -13,6 +13,7 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	pb "route_guide/routeguide"
 )
@@ -46,12 +47,52 @@ type RouteGuideServer struct {
 	RouteNotes map[string][]*pb.RouteNote
 }
 
+// printFeatures lists all the features within the given bounding Rectangle.
+func printFeatures(client pb.RouteGuideClient, rect *pb.Rectangle, log *logrus.Entry) {
+	log.Printf("Looking for features within %v", rect)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	stream, err := client.ListFeatures(ctx, rect)
+	if err != nil {
+		log.Fatalf("%v.ListFeatures(_) = _, %v", client, err)
+	}
+	count := 0
+	for {
+		_, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatalf("%v.ListFeatures(_) = _, %v", client, err)
+		}
+		count++
+	}
+	log.Infof("printFeatures finish: %d", count)
+}
+
 // GetFeature returns the feature at the given point.
 func (s *RouteGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feature, error) {
 	log := cmd.GetLog(ctx)
 	for _, feature := range s.savedFeatures {
 		if proto.Equal(feature.Location, point) {
 			log.Infof("GetFeatureSucc")
+			cli, err := cmd.GetEtcdClient("localhost", 2379)
+			if err != nil {
+				log.Infof("GetEtcdClient error:%v", err)
+				return feature, nil
+			}
+			defer cli.Close()
+			conn, err := cmd.GetGrpcConn(ctx, "myService", cli, log)
+			if err != nil {
+				log.Infof("GetEtcdClient error:%v", err)
+				return feature, nil
+			}
+			defer conn.Close()
+			client := pb.NewRouteGuideClient(conn)
+			printFeatures(client, &pb.Rectangle{
+				Lo: &pb.Point{Latitude: 400000000, Longitude: -750000000},
+				Hi: &pb.Point{Latitude: 420000000, Longitude: -730000000},
+			}, log)
 			return feature, nil
 		}
 	}

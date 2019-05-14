@@ -5,7 +5,8 @@ MainVersion = "0.0.1"
 ## Features
 1. etcd服务发现
 2. 采用注册方式解耦
-3. requestid中间件
+3. 跨服务串联requestid
+4. 版本管理，Makefile
 
 ## Bug Fixes
 
