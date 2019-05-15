@@ -6,3 +6,6 @@ EtcdHost="localhost"
 EtcdPort=2379
 
 LogPath="/tmp/log/route_guide.log"
+
+
+JSONDBFile = "testdata/route_guide_db.json"

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"route_guide/pkg/caller"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
@@ -28,12 +29,17 @@ func InitGrpcLog(filename string) (*logrus.Entry, error) {
 	}
 	entry := logrus.New()
 	entry.Formatter = &logrus.JSONFormatter{}
+	hookCaller := caller.NewHook(&caller.CallerHookOptions{
+		Flags:      caller.Llongfile,
+		EnableLine: true,
+		EnableFile: true,
+	})
+	entry.Hooks[logrus.InfoLevel] = append(entry.Hooks[logrus.InfoLevel], hookCaller)
 	entry.Out = grpcLog
 
 	log := entry.WithFields(logrus.Fields{
 		"pid": os.Getpid(),
 	})
-
 	log.Infof("init grpclog success")
 	return log, nil
 }

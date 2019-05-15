@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"math"
 	"route_guide/cmd"
+	"route_guide/configfile"
 	"sync"
 	"time"
 
@@ -15,33 +16,34 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+
 	pb "route_guide/routeguide"
 )
 
-var (
-	jsonDBFile = "testdata/route_guide_db.json"
-)
-
 func init() {
-	cmd.PutRegisterFunc("myService", RegisterServer)
+	//注册服务初始化函数
+	cmd.RegisterService("myService", InitServer)
 
 }
-func RegisterServer(grpcServer *grpc.Server) error {
-	srv, err := newServer()
+
+// InitServer 初始化myService服务
+func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
+	srv := &GuideServer{
+		RouteNotes: make(map[string][]*pb.RouteNote),
+		config:     config,
+	}
+	err := srv.LoadFeatures(config.JSONDBFile)
 	if err != nil {
 		return err
 	}
 	pb.RegisterRouteGuideServer(grpcServer, srv)
 	return nil
 }
-func newServer() (*RouteGuideServer, error) {
-	s := &RouteGuideServer{RouteNotes: make(map[string][]*pb.RouteNote)}
-	err := s.LoadFeatures(jsonDBFile)
-	return s, err
-}
 
-type RouteGuideServer struct {
+// GuideServer 自定义服务结构体
+type GuideServer struct {
 	savedFeatures []*pb.Feature // read-only after initialized
+	config        *configfile.Config
 
 	mu         sync.Mutex // protects RouteNotes
 	RouteNotes map[string][]*pb.RouteNote
@@ -71,12 +73,12 @@ func printFeatures(client pb.RouteGuideClient, rect *pb.Rectangle, log *logrus.E
 }
 
 // GetFeature returns the feature at the given point.
-func (s *RouteGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feature, error) {
+func (s *GuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feature, error) {
 	log := cmd.GetLog(ctx)
 	for _, feature := range s.savedFeatures {
 		if proto.Equal(feature.Location, point) {
 			log.Infof("GetFeatureSucc")
-			cli, err := cmd.GetEtcdClient("localhost", 2379)
+			cli, err := cmd.GetEtcdClient(s.config.EtcdHost, s.config.EtcdPort)
 			if err != nil {
 				log.Infof("GetEtcdClient error:%v", err)
 				return feature, nil
@@ -101,7 +103,7 @@ func (s *RouteGuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb
 }
 
 // ListFeatures lists all features contained within the given bounding Rectangle.
-func (s *RouteGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide_ListFeaturesServer) error {
+func (s *GuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide_ListFeaturesServer) error {
 	log := cmd.GetLog(stream.Context())
 	for _, feature := range s.savedFeatures {
 		if inRange(feature.Location, rect) {
@@ -119,7 +121,7 @@ func (s *RouteGuideServer) ListFeatures(rect *pb.Rectangle, stream pb.RouteGuide
 // It gets a stream of points, and responds with statistics about the "trip":
 // number of points,  number of known features visited, total distance traveled, and
 // total time spent.
-func (s *RouteGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) error {
+func (s *GuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) error {
 	var pointCount, featureCount, distance int32
 	var lastPoint *pb.Point
 	startTime := time.Now()
@@ -152,7 +154,7 @@ func (s *RouteGuideServer) RecordRoute(stream pb.RouteGuide_RecordRouteServer) e
 
 // RouteChat receives a stream of message/location pairs, and responds with a stream of all
 // previous messages at each of those locations.
-func (s *RouteGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error {
+func (s *GuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error {
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
@@ -181,7 +183,7 @@ func (s *RouteGuideServer) RouteChat(stream pb.RouteGuide_RouteChatServer) error
 }
 
 // LoadFeatures loads features from a JSON file.
-func (s *RouteGuideServer) LoadFeatures(filePath string) error {
+func (s *GuideServer) LoadFeatures(filePath string) error {
 	file, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return errors.Wrap(err, "Failed to load default features")

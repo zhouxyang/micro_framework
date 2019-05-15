@@ -150,6 +150,7 @@ func unRegisterEtcd(log *logrus.Entry, conf *configfile.Config) error {
 }
 
 func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
+	// 配置gprc中间件
 	grpcServer := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_logrus.StreamServerInterceptor(log),
@@ -163,9 +164,9 @@ func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
 		)),
 	)
 
-	// 注册提供的微服务
-	for _, registerServer := range cmd.ServerDrivers {
-		registerServer(grpcServer)
+	// 初始化并注册提供的微服务
+	for _, initServer := range cmd.ServerDrivers {
+		initServer(grpcServer, conf)
 	}
 	// 优雅关闭以及热重启
 	c := make(chan os.Signal, 1)

@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Config 全局配置文件
 type Config struct {
 	Host     string
 	Port     int
@@ -12,8 +13,11 @@ type Config struct {
 	LogPath  string
 	EtcdHost string
 	EtcdPort int
+
+	JSONDBFile string
 }
 
+// GetConfig 解析并获取配置文件
 func GetConfig(filename string) (*Config, error) {
 	conf := &Config{}
 	if _, err := toml.DecodeFile(filename, conf); err != nil {

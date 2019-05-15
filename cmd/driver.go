@@ -2,20 +2,23 @@ package cmd
 
 import (
 	"fmt"
-	"google.golang.org/grpc"
+	"route_guide/configfile"
 	"sync"
+
+	"google.golang.org/grpc"
 )
 
-type RegisterFunc func(grpcServer *grpc.Server) error
+// InitServiceFunc 服务初始化函数
+type InitServiceFunc func(grpcServer *grpc.Server, config *configfile.Config) error
 
 var (
 	serverDriversMu sync.RWMutex
 	// ServerDrivers the login drivers
-	ServerDrivers = make(map[string]RegisterFunc)
+	ServerDrivers = make(map[string]InitServiceFunc)
 )
 
-// RegisterRegisterFunc register a new driver for ip query
-func PutRegisterFunc(name string, driver RegisterFunc) {
+// RegisterService register a new driver for service
+func RegisterService(name string, driver InitServiceFunc) {
 	serverDriversMu.Lock()
 	defer serverDriversMu.Unlock()
 
@@ -30,8 +33,8 @@ func PutRegisterFunc(name string, driver RegisterFunc) {
 	ServerDrivers[name] = driver
 }
 
-// GetRegisterFunc get the ip query func by pay_method
-func GetRegisterFunc(name string) (RegisterFunc, bool) {
+// GetService get the initService func by service name
+func GetService(name string) (InitServiceFunc, bool) {
 	serverDriversMu.RLock()
 	defer serverDriversMu.RUnlock()
 
