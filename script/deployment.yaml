@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+    name: micro-framework
+    labels:
+        app: micro-framework  # 为所有 Pod 都打上这个标签
+spec:
+    replicas: 1
+    template:
+        metadata:
+            labels:
+                app: micro-framework  # 为所有 Pod 都打上这个标签
+        spec:
+            containers:
+                - name: micro
+                  image: micro-framework
+                  imagePullPolicy: Never
+                  command: [ "/bin/sh", "-c", "micro_framework run /etc/config/config.toml" ]
+                  ports:
+                    - containerPort: 10000
+                      name: grpc
+                  volumeMounts:
+                    - name: config-volume
+                      mountPath: /etc/config
+                    - name: go-logs
+                      mountPath: /tmp/route_guide.log 
+            volumes:
+                - name: config-volume
+                  configMap:
+                    name: micro-config 
+                    items:
+                        - key: config.toml
+                          path: config.toml
+                - name: go-logs
+                  hostPath:
+                    path: /tmp/log/route_guide.log
+            restartPolicy: Always 

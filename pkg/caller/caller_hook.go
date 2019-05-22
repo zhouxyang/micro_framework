@@ -2,7 +2,6 @@ package caller
 
 // refer to https://github.com/xdxiaodong/logrus-hook-caller
 import (
-	"fmt"
 	"log"
 	"path"
 	"runtime"
@@ -11,7 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// refer import "log"
 const (
 	Ldate         = 1 << iota     // the date in the local time zone: 2009/01/23
 	Ltime                         // the time in the local time zone: 01:23:23
@@ -21,17 +19,6 @@ const (
 	LUTC                          // if Ldate or Ltime is set, use UTC rather than the local time zone
 	LstdFlags     = Ldate | Ltime // initial values for the standard logger
 )
-
-// CallerHook adds caller information to log entries.
-//
-// Sample usage:
-// logrus.AddHook(caller.NewHook(&caller.CallerHookOptions{
-// 	Field: "src",
-// 	Flags: log.Lshortfile,
-// }))
-// logrus.SetFormatter(&logrus.JSONFormatter{})
-// logrus.Info("Test log")
-// // time="2018-05-10T00:00:00-00:00" level=info msg="Test log" file="main.go:66"
 
 type CallerHook struct {
 	CallerHookOptions *CallerHookOptions
@@ -49,9 +36,6 @@ func NewHook(options *CallerHookOptions) *CallerHook {
 	}
 	// Set default caller flag to Std logger log.Llongfile
 	if options.Flags == 0 {
-		// old
-		//options.Flags = log.Llongfile
-		// new
 		options.Flags = log.Lshortfile
 	}
 	return &CallerHook{options}
@@ -59,18 +43,12 @@ func NewHook(options *CallerHookOptions) *CallerHook {
 
 // CallerHookOptions stores caller hook options
 type CallerHookOptions struct {
-	// new
 	FileAlias  string //default:file
 	EnableFile bool
 	LineAlias  string //default:line
 	EnableLine bool
-	// old
-	DisabledField bool
 	// Stores the flags
 	Flags int
-
-	//fileNmar
-	//Line Nmae
 }
 
 // HasFlag returns true if the report caller options contains the specified flag
@@ -80,9 +58,6 @@ func (options *CallerHookOptions) HasFlag(flag int) bool {
 
 func (hook *CallerHook) Fire(entry *logrus.Entry) error {
 
-	// new
-	// get caller file and line here, it won't be available inside the goroutine
-	// 1 for the function that called us.
 	file, line := getCallerIgnoringLogMulti(1)
 	if hook.CallerHookOptions.HasFlag(log.Lshortfile) && !hook.CallerHookOptions.HasFlag(log.Llongfile) {
 		file = path.Base(file)
@@ -93,11 +68,6 @@ func (hook *CallerHook) Fire(entry *logrus.Entry) error {
 	if hook.CallerHookOptions.EnableLine {
 		entry.Data[hook.CallerHookOptions.LineAlias] = line
 	}
-
-	// old
-	//entry.Data[hook.CallerHookOptions.Field] = hook.callerInfo(entry.CallerFrames() + 1) // add 1 for this frame
-	//entry.Data[hook.CallerHookOptions.Field] = hook.callerInfo(1) // add 1 for this frame
-
 	return nil
 }
 
@@ -112,28 +82,6 @@ func (hook *CallerHook) Levels() []logrus.Level {
 	}
 }
 
-//old
-func (hook *CallerHook) callerInfo(skipFrames int) string {
-	// Follows output of Std logger
-	_, file, line, ok := runtime.Caller(skipFrames)
-	if !ok {
-		file = "???"
-		line = 0
-	} else {
-		// check flags
-		if hook.CallerHookOptions.HasFlag(log.Lshortfile) && !hook.CallerHookOptions.HasFlag(log.Llongfile) {
-			file = path.Base(file)
-		}
-	}
-	return fmt.Sprintf("%s:%d", file, line)
-}
-
-// getCaller returns the filename and the line info of a function
-// further down in the call stack.  Passing 0 in as callDepth would
-// return info on the function calling getCallerIgnoringLog, 1 the
-// parent function, and so on.  Any suffixes passed to getCaller are
-// path fragments like "/pkg/log/log.go", and functions in the call
-// stack from that file are ignored.
 func getCaller(callDepth int, suffixesToIgnore ...string) (file string, line int) {
 	// bump by 1 to ignore the getCaller (this) stackframe
 	callDepth++
