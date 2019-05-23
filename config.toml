@@ -1,11 +1,11 @@
 # 监听端口
 Host="0.0.0.0"
-Port=10000
+Port=10001
 
-EtcdHost="localhost"
+EtcdHost="10.249.155.239"
 EtcdPort=2379
 
-LogPath="/tmp/log/route_guide.log"
+LogPath="/tmp/route_guide.log"
 
 
 JSONDBFile = "testdata/route_guide_db.json"

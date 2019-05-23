@@ -3,17 +3,19 @@ kind: Ingress
 metadata:
     annotations:
         kubernetes.io/ingress.class: "nginx"
-        nginx.ingress.kubernetes.io/grpc-backend: "true"
-        nginx.ingress.kubernetes.io/ssl-redirect: "false"
-        nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+        nginx.ingress.kubernetes.io/ssl-redirect: "true"
         nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+        nginx.ingress.kubernetes.io/proxy-buffer-size: "8k"
     name: micro-framework
 
 spec:
     rules:
-    - host: micro-framework.mydomain.com
-      http:
+    - http:
         paths: 
         - backend:
             serviceName: micro-framework
             servicePort: grpc
+    tls:
+    - secretName: tls-secret
+      hosts:
+        - micro-framework.mydomain.com

@@ -23,7 +23,7 @@ spec:
                     - name: config-volume
                       mountPath: /etc/config
                     - name: go-logs
-                      mountPath: /tmp/route_guide.log 
+                      mountPath: /tmp
             volumes:
                 - name: config-volume
                   configMap:
@@ -33,5 +33,5 @@ spec:
                           path: config.toml
                 - name: go-logs
                   hostPath:
-                    path: /tmp/log/route_guide.log
+                    path: /tmp/log/
             restartPolicy: Always 

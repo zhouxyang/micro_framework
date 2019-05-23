@@ -1,23 +1,25 @@
 package main
 
 import (
+	"crypto/tls"
 	"flag"
 	"io"
 	"log"
 	"math/rand"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
-	etcdnaming "github.com/coreos/etcd/clientv3/naming"
+	//	"github.com/coreos/etcd/clientv3"
+	//	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	"github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	pb "google.golang.org/grpc/examples/route_guide/routeguide"
 	"google.golang.org/grpc/metadata"
 )
 
 var (
-	port = flag.Int("port", 10000, "The server port")
+	serverAddr = flag.String("server_addr", "127.0.0.1:10000", "The server address in the format of host:port")
 )
 
 // printFeature gets the feature for the given point.
@@ -129,14 +131,22 @@ func randomPoint(r *rand.Rand) *pb.Point {
 
 func main() {
 	flag.Parse()
-	cli, cerr := clientv3.NewFromURL("http://localhost:2379")
+	/*cli, cerr := clientv3.NewFromURL("http://localhost:2379")
 	if cerr != nil {
 		log.Fatalf("NewFromURL err: %v", cerr)
 	}
 	r := &etcdnaming.GRPCResolver{Client: cli}
-	b := grpc.RoundRobin(r)
-	conn, gerr := grpc.Dial("myService", grpc.WithInsecure(), grpc.WithBalancer(b), grpc.WithBlock(), grpc.WithUnaryInterceptor(UnaryClientInterceptor),
-		grpc.WithStreamInterceptor(StreamClientInterceptor))
+	b := grpc.RoundRobin(r)*/
+	log.Println(*serverAddr)
+	var tlsConf tls.Config
+	tlsConf.InsecureSkipVerify = true
+	var opts []grpc.DialOption
+	creds := credentials.NewTLS(&tlsConf)
+	//conn, gerr := grpc.Dial(*serverAddr, grpc.WithInsecure(),grpc.WithBlock(), grpc.WithUnaryInterceptor(UnaryClientInterceptor),
+	//	grpc.WithStreamInterceptor(StreamClientInterceptor))*/
+	opts = append(opts, grpc.WithTransportCredentials(creds))
+	//	opts = append(opts, grpc.WithInsecure())
+	conn, gerr := grpc.Dial(*serverAddr, opts...)
 	if gerr != nil {
 		log.Fatalf("fail to dial: %v", gerr)
 	}
@@ -145,15 +155,14 @@ func main() {
 
 	// Looking for a valid feature
 
-	printFeature(client, &pb.Point{Latitude: 409146138, Longitude: -746188906})
+	//printFeature(client, &pb.Point{Latitude: 409146138, Longitude: -746188906})
 	// Feature missing.
 	//printFeature(client, &pb.Point{Latitude: 0, Longitude: 0})
 	// Looking for features between 40, -75 and 42, -73.
-	/*printFeatures(client, &pb.Rectangle{
+	printFeatures(client, &pb.Rectangle{
 		Lo: &pb.Point{Latitude: 400000000, Longitude: -750000000},
 		Hi: &pb.Point{Latitude: 420000000, Longitude: -730000000},
 	})
-	*/
 	// RecordRoute
 	//runRecordRoute(client)
 

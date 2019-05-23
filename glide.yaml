@@ -23,3 +23,9 @@ import:
   - examples/route_guide/routeguide
   - metadata
   - testdata
+- package: golang.org/x/sys
+  version: 1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded
+  subpackages:
+  - unix
+  - windows
+

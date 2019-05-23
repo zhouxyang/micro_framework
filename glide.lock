@@ -1,6 +1,8 @@
-hash: be1c3fce514c86728a39eadb024ed333c7b931214b6a471672c142f8156fc382
-updated: 2019-05-13T19:39:39.090533+08:00
+hash: 42333b2a6aa9ee2361ac232cb5f8498f50d17912e10fd6d6afcef12fff177569
+updated: 2019-05-16T10:59:52.019269+08:00
 imports:
+- name: github.com/BurntSushi/toml
+  version: 99064174e013895bbd9b025c31100bd1d9b590ca
 - name: github.com/coreos/etcd
   version: 98d308426819d892e149fe45f6fd542464cb1f9d
   subpackages:
@@ -38,14 +40,23 @@ imports:
   - logging/logrus
   - logging/logrus/ctxlogrus
   - recovery
+  - retry
   - tags
   - tags/logrus
+  - util/backoffutils
+  - util/metautils
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/pkg/errors
   version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
 - name: github.com/satori/go.uuid
   version: b061729afc07e77a8aa4fad0a2fd840958f1942a
 - name: github.com/sirupsen/logrus
   version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
+- name: github.com/spf13/cobra
+  version: 9495bc009a56819bdb0ddbc1a373e29c140bc674
+- name: github.com/spf13/pflag
+  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: golang.org/x/crypto
   version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:
@@ -63,7 +74,7 @@ imports:
   - lex/httplex
   - trace
 - name: golang.org/x/sys
-  version: ebfc5b4631820b793c9010c87fd8fef0f39eb082
+  version: 1c9583448a9c3aa0f9a6a5241bf73c0bd8aafded
   subpackages:
   - unix
   - windows
@@ -116,4 +127,16 @@ imports:
   - status
   - tap
   - testdata
-testImports: []
+testImports:
+- name: github.com/davecgh/go-spew
+  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: 5d4384ee4fb2527b0a1256a821ebfc92f91efefc
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 34c6fa2dc70986bccbbffcc6130f6920a924b075
+  subpackages:
+  - assert

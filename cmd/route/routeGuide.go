@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	pb "route_guide/routeguide"
 )
@@ -37,6 +38,8 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 		return err
 	}
 	pb.RegisterRouteGuideServer(grpcServer, srv)
+	// Register reflection service on gRPC server.
+	reflection.Register(grpcServer)
 	return nil
 }
 

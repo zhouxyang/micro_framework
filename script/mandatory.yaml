@@ -208,6 +208,7 @@ spec:
         prometheus.io/port: "10254"
         prometheus.io/scrape: "true"
     spec:
+      hostNetwork: true 
       serviceAccountName: nginx-ingress-serviceaccount
       containers:
         - name: nginx-ingress-controller
@@ -219,6 +220,7 @@ spec:
             - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
             - --publish-service=$(POD_NAMESPACE)/ingress-nginx
             - --annotations-prefix=nginx.ingress.kubernetes.io
+            - --default-ssl-certificate=$(POD_NAMESPACE)/tls-secret
           securityContext:
             allowPrivilegeEscalation: true
             capabilities:
@@ -240,8 +242,10 @@ spec:
           ports:
             - name: http
               containerPort: 80
+              hostPort: 80
             - name: https
               containerPort: 443
+              hostPort: 443
           livenessProbe:
             failureThreshold: 3
             httpGet:
