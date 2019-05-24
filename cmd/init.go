@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"route_guide/configfile"
 	"route_guide/pkg/caller"
 	"time"
 
@@ -63,8 +64,8 @@ func GetEtcdClient(ip string, port int) (*clientv3.Client, error) {
 	return cli, nil
 }
 
-// GetGrpcConn 创建grpc连接
-func GetGrpcConn(ctx context.Context, service string, cli *clientv3.Client, log *logrus.Entry) (*grpc.ClientConn, error) {
+// GetGrpcConnByEtcd 创建grpc连接
+func GetGrpcConnByEtcd(ctx context.Context, service string, cli *clientv3.Client, log *logrus.Entry) (*grpc.ClientConn, error) {
 	r := &etcdnaming.GRPCResolver{Client: cli}
 	b := grpc.RoundRobin(r)
 	conn, err := grpc.DialContext(
@@ -94,4 +95,79 @@ func GetGrpcConn(ctx context.Context, service string, cli *clientv3.Client, log 
 		return nil, err
 	}
 	return conn, err
+}
+
+// GrpcClientConn 封装的grpc连接
+type GrpcClientConn struct {
+	GrpcConn *grpc.ClientConn
+	EtcdConn *clientv3.Client
+}
+
+// GetGrpcConnByDomain 创建grpc连接
+func GetGrpcConnByDomain(ctx context.Context, service string, log *logrus.Entry) (*grpc.ClientConn, error) {
+	conn, err := grpc.DialContext(
+		ctx,
+		service,
+		grpc.WithInsecure(),
+		grpc.WithBlock(),
+		grpc.WithUnaryInterceptor(
+			grpc_middleware.ChainUnaryClient(
+				grpc_logrus.UnaryClientInterceptor(log),
+				grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
+				grpc_requestid.UnaryClientInterceptor(log),
+			),
+		),
+		grpc.WithStreamInterceptor(
+			grpc_middleware.ChainStreamClient(
+				grpc_logrus.StreamClientInterceptor(log),
+				grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
+				grpc_requestid.StreamClientInterceptor(log),
+			),
+		),
+	)
+
+	if err != nil {
+		errors.Wrap(err, "fail to dial")
+		return nil, err
+	}
+	return conn, err
+}
+
+// GetGrpcClientConn 创建grpc客户端连接，1. 先判断在etcd是否找得到该服务，2. 如果服务不在etcd中，则service为外部服务域名
+func GetGrpcClientConn(ctx context.Context, conf *configfile.Config, service string, log *logrus.Entry) (*GrpcClientConn, error) {
+	cli, err := GetEtcdClient(conf.EtcdHost, conf.EtcdPort)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetEtcdClient error")
+	}
+	resp, err := cli.Get(context.TODO(), service, clientv3.WithPrefix())
+	if err != nil {
+		return nil, errors.Wrap(err, "kv.get error")
+	}
+	log.Infof("get service:%s return resp:%+v, count:%d", service, resp, resp.Count)
+	if resp.Count > 0 {
+		grpcConn, err := GetGrpcConnByEtcd(ctx, service, cli, log)
+		if err != nil {
+			return nil, errors.Wrap(err, "GetGrpcConnByEtcd")
+		}
+		return &GrpcClientConn{
+			GrpcConn: grpcConn,
+			EtcdConn: cli,
+		}, nil
+
+	}
+	grpcConn, err := GetGrpcConnByDomain(ctx, service, log)
+	if err != nil {
+		return nil, errors.Wrap(err, "GetGrpcConnByDomain")
+	}
+	return &GrpcClientConn{
+		GrpcConn: grpcConn,
+		EtcdConn: cli,
+	}, nil
+
+}
+
+// Close 关闭etcd连接，grpc连接
+func (c *GrpcClientConn) Close() {
+	c.EtcdConn.Close()
+	c.GrpcConn.Close()
 }

@@ -7,14 +7,18 @@ import (
 
 // Config 全局配置文件
 type Config struct {
-	Host     string
-	Port     int
-	ServerID int
-	LogPath  string
-	EtcdHost string
-	EtcdPort int
+	Host       string
+	Port       int
+	ServerName string
+	ServerID   int
+	LogPath    string
+	EtcdHost   string
+	EtcdPort   int
 
 	JSONDBFile string
+	MyService  struct {
+		ServiceName string
+	}
 }
 
 // GetConfig 解析并获取配置文件

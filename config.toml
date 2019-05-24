@@ -1,11 +1,17 @@
-# 监听端口
+# HOST监听端口,容器部署时为0.0.0.0，启动镜像时会替换为pod ip
 Host="0.0.0.0"
 Port=10001
 
-EtcdHost="10.249.155.239"
+ServerName = "MyService"
+# EtcdHost etcd部署地址ip
+EtcdHost="192.168.0.104"
 EtcdPort=2379
 
 LogPath="/tmp/route_guide.log"
 
 
 JSONDBFile = "testdata/route_guide_db.json"
+
+[MyService]
+	# 单集群时为上面的ServerName，多集群时为域名
+	ServiceName = "MyService"

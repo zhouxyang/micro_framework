@@ -23,11 +23,11 @@ import (
 
 func init() {
 	//注册服务初始化函数
-	cmd.RegisterService("myService", InitServer)
+	cmd.RegisterService("MyService", InitServer)
 
 }
 
-// InitServer 初始化myService服务
+// InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 	srv := &GuideServer{
 		RouteNotes: make(map[string][]*pb.RouteNote),
@@ -81,19 +81,13 @@ func (s *GuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feat
 	for _, feature := range s.savedFeatures {
 		if proto.Equal(feature.Location, point) {
 			log.Infof("GetFeatureSucc")
-			cli, err := cmd.GetEtcdClient(s.config.EtcdHost, s.config.EtcdPort)
-			if err != nil {
-				log.Infof("GetEtcdClient error:%v", err)
-				return feature, nil
-			}
-			defer cli.Close()
-			conn, err := cmd.GetGrpcConn(ctx, "myService", cli, log)
+			conn, err := cmd.GetGrpcClientConn(ctx, s.config, s.config.MyService.ServiceName, log)
 			if err != nil {
 				log.Infof("GetEtcdClient error:%v", err)
 				return feature, nil
 			}
 			defer conn.Close()
-			client := pb.NewRouteGuideClient(conn)
+			client := pb.NewRouteGuideClient(conn.GrpcConn)
 			printFeatures(client, &pb.Rectangle{
 				Lo: &pb.Point{Latitude: 400000000, Longitude: -750000000},
 				Hi: &pb.Point{Latitude: 420000000, Longitude: -730000000},

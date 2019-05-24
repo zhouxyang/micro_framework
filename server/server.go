@@ -118,12 +118,10 @@ func registerEtcd(log *logrus.Entry, conf *configfile.Config) error {
 	r := &etcdnaming.GRPCResolver{Client: cli}
 
 	// 将本服务注册添加etcd
-	for name := range cmd.ServerDrivers {
-		err = r.Update(context.TODO(), name, naming.Update{Op: naming.Add, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
-		if err != nil {
-			log.Infof("[测] update etcd err:", err)
-			return err
-		}
+	err = r.Update(context.TODO(), conf.ServerName, naming.Update{Op: naming.Add, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
+	if err != nil {
+		log.Infof("[测] update etcd err:", err)
+		return err
 	}
 	return nil
 
@@ -137,13 +135,11 @@ func unRegisterEtcd(log *logrus.Entry, conf *configfile.Config) error {
 	}
 	// 创建命名解析
 	r := &etcdnaming.GRPCResolver{Client: cli}
-	for name := range cmd.ServerDrivers {
-		// 将本服务注册添加etcd中
-		err = r.Update(context.TODO(), name, naming.Update{Op: naming.Delete, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
-		if err != nil {
-			log.Infof("update etcd err:", err)
-			return err
-		}
+	// 将本服务注册添加etcd中
+	err = r.Update(context.TODO(), conf.ServerName, naming.Update{Op: naming.Delete, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
+	if err != nil {
+		log.Infof("update etcd err:", err)
+		return err
 	}
 	return nil
 
