@@ -5,7 +5,7 @@ metadata:
     labels:
         app: micro-framework  # 为所有 Pod 都打上这个标签
 spec:
-    replicas: 1
+    replicas: 2
     template:
         metadata:
             labels:
@@ -15,7 +15,7 @@ spec:
                 - name: micro
                   image: micro-framework
                   imagePullPolicy: Never
-                  command: [ "/bin/sh", "-c", "micro_framework run /etc/config/config.toml" ]
+                  command: [ "/bin/sh", "-c", " sh start.sh" ]
                   ports:
                     - containerPort: 10000
                       name: grpc
@@ -24,6 +24,12 @@ spec:
                       mountPath: /etc/config
                     - name: go-logs
                       mountPath: /tmp
+                  env:
+                    - name: MY_POD_IP
+                      valueFrom:
+                        fieldRef:
+                          fieldPath: status.podIP
+
             volumes:
                 - name: config-volume
                   configMap:
