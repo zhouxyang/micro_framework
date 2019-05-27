@@ -81,7 +81,7 @@ func (s *GuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feat
 	for _, feature := range s.savedFeatures {
 		if proto.Equal(feature.Location, point) {
 			log.Infof("GetFeatureSucc")
-			conn, err := cmd.GetGrpcClientConn(ctx, s.config, s.config.MyService.ServiceName, log)
+			conn, err := cmd.GetGrpcClientConn(ctx, s.config, s.config.MyService.ExternalServiceName, log)
 			if err != nil {
 				log.Infof("GetEtcdClient error:%v", err)
 				return feature, nil

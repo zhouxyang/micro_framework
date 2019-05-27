@@ -17,7 +17,7 @@ type Config struct {
 
 	JSONDBFile string
 	MyService  struct {
-		ServiceName string
+		ExternalServiceName string
 	}
 }
 
