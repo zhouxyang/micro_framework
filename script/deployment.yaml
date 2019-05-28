@@ -14,15 +14,12 @@ spec:
             containers:
                 - name: micro
                   lifecycle:
-                      postStart:
-                        exec:
-                          command: ["/bin/sh", "-c", "sh script/post_start.sh"]
                       preStop:
                         exec:
                           command: ["/bin/sh", "-c", "sh script/pre_stop.sh"]
                   image: micro-framework
                   imagePullPolicy: Never
-                  command: [ "/bin/sh", "-c", " micro_framework run /go/src/route_guide/config.toml" ]
+                  command: [ "/bin/sh", "-c", "sh  script/start.sh" ]
                   ports:
                     - containerPort: 10000
                       name: grpc
