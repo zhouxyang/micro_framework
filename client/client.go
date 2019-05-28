@@ -1,7 +1,7 @@
 package main
 
 import (
-	"crypto/tls"
+	//"crypto/tls"
 	"flag"
 	"io"
 	"log"
@@ -131,21 +131,39 @@ func randomPoint(r *rand.Rand) *pb.Point {
 
 func main() {
 	flag.Parse()
-	/*cli, cerr := clientv3.NewFromURL("http://localhost:2379")
-	if cerr != nil {
-		log.Fatalf("NewFromURL err: %v", cerr)
-	}
-	r := &etcdnaming.GRPCResolver{Client: cli}
-	b := grpc.RoundRobin(r)*/
+	/*
+		//此处是通过etcd服务发现连server
+		cli, cerr := clientv3.NewFromURL("http://localhost:2379")
+		if cerr != nil {
+			log.Fatalf("NewFromURL err: %v", cerr)
+		}
+		r := &etcdnaming.GRPCResolver{Client: cli}
+		b := grpc.RoundRobin(r)
+	*/
 	log.Println(*serverAddr)
-	var tlsConf tls.Config
-	tlsConf.InsecureSkipVerify = true
 	var opts []grpc.DialOption
-	creds := credentials.NewTLS(&tlsConf)
-	//conn, gerr := grpc.Dial(*serverAddr, grpc.WithInsecure(),grpc.WithBlock(), grpc.WithUnaryInterceptor(UnaryClientInterceptor),
-	//	grpc.WithStreamInterceptor(StreamClientInterceptor))*/
+	/*
+		//此处是跳过证书验证的连接server，即insecure
+		var tlsConf tls.Config
+		tlsConf.InsecureSkipVerify = true
+		creds := credentials.NewTLS(&tlsConf)
+		opts = append(opts, grpc.WithTransportCredentials(creds))
+	*/
+	/*
+		// 此处是使用客户端中间件
+		conn, gerr := grpc.Dial(*serverAddr, grpc.WithInsecure(),grpc.WithBlock(), grpc.WithUnaryInterceptor(UnaryClientInterceptor),
+			grpc.WithStreamInterceptor(StreamClientInterceptor))
+	*/
+
+	/*
+		//此处是明文传输 即plaintext
+		opts = append(opts, grpc.WithInsecure())
+	*/
+	creds, err := credentials.NewClientTLSFromFile("./script/server.crt", "")
+	if err != nil {
+		log.Fatalf("fail to new: %v", err)
+	}
 	opts = append(opts, grpc.WithTransportCredentials(creds))
-	//	opts = append(opts, grpc.WithInsecure())
 	conn, gerr := grpc.Dial(*serverAddr, opts...)
 	if gerr != nil {
 		log.Fatalf("fail to dial: %v", gerr)

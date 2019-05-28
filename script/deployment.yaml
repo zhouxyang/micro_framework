@@ -13,6 +13,10 @@ spec:
         spec:
             containers:
                 - name: micro
+                  lifecycle:
+                      preStop:
+                        exec:
+                          command: ["/bin/sh", "-c", "sh stop.sh"]
                   image: micro-framework
                   imagePullPolicy: Never
                   command: [ "/bin/sh", "-c", " sh start.sh" ]
