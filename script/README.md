@@ -3,6 +3,10 @@
 1. kubectl create -f mandatory.yaml
 2. kubectl create -f cloud-generic.yaml
 3. kubectl create -f ingress.yaml
+4. kubectl create secret tls tls-secret --key script/server.key --cert script/server.crt  -n ingress-nginx
+
+* 附证书创建过程:
+1. openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout script/server.key -out script/server.crt -subj "/CN=micro-framework.mydomain.com/O=micro-framework.mydomain.com"
 
 ## 创建etcd集群
 1. kubectl create -f etcd-cluster.yaml
