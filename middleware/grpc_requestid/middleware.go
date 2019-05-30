@@ -22,7 +22,7 @@ func UnaryServerInterceptor(entry *logrus.Entry) grpc.UnaryServerInterceptor {
 			log.Infof("UnaryEcho: failed to get metadata")
 		}
 		if t, ok := md["requestid"]; ok {
-			log.Infof("requestid from metadata:%v", t)
+			//log.Infof("requestid from metadata:%v", t)
 			for _, e := range t {
 				u1 = e
 			}
@@ -49,7 +49,7 @@ func StreamServerInterceptor(entry *logrus.Entry) grpc.StreamServerInterceptor {
 			log.Infof("ServerStreamingEcho: failed to get metadata")
 		}
 		if t, ok := md["requestid"]; ok {
-			log.Infof("request from metadata: %v", t)
+			//log.Infof("request from metadata: %v", t)
 			for _, e := range t {
 				u1 = e
 			}
@@ -78,9 +78,9 @@ func UnaryClientInterceptor(log *logrus.Entry, opts ...grpc_logrus.Option) grpc.
 		// Read metadata from client.
 		md := metadata.Pairs("requestid", requestid)
 		newCtx := metadata.NewOutgoingContext(ctx, md)
-		log.Infof("before invoker. method: %+v, request:%+v, requestid:%v", method, req, requestid)
+		//log.Infof("before invoker. method: %+v, request:%+v, requestid:%v", method, req, requestid)
 		err := invoker(newCtx, method, req, reply, cc, opts...)
-		log.Infof("after invoker. reply: %+v", reply)
+		//log.Infof("after invoker. reply: %+v", reply)
 		return err
 	}
 }
@@ -95,9 +95,9 @@ func StreamClientInterceptor(log *logrus.Entry, opts ...grpc_logrus.Option) grpc
 		// Read metadata from client.
 		md := metadata.Pairs("requestid", requestid)
 		newCtx := metadata.NewOutgoingContext(ctx, md)
-		log.Infof("before invoker. method: %+v, StreamDesc:%+v, requestid:%v", method, desc, requestid)
+		//log.Infof("before invoker. method: %+v, StreamDesc:%+v, requestid:%v", method, desc, requestid)
 		clientStream, err := streamer(newCtx, desc, cc, method, opts...)
-		log.Infof("before invoker. method: %+v", method)
+		//log.Infof("before invoker. method: %+v", method)
 		return clientStream, err
 	}
 }

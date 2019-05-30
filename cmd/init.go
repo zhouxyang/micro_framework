@@ -17,7 +17,7 @@ import (
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
-	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
+	//grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	grpc_requestid "route_guide/middleware/grpc_requestid"
 )
 
@@ -77,14 +77,14 @@ func GetGrpcConnByEtcd(ctx context.Context, service string, cli *clientv3.Client
 		grpc.WithUnaryInterceptor(
 			grpc_middleware.ChainUnaryClient(
 				grpc_logrus.UnaryClientInterceptor(log),
-				grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
+				//grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
 				grpc_requestid.UnaryClientInterceptor(log),
 			),
 		),
 		grpc.WithStreamInterceptor(
 			grpc_middleware.ChainStreamClient(
 				grpc_logrus.StreamClientInterceptor(log),
-				grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
+				//grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
 				grpc_requestid.StreamClientInterceptor(log),
 			),
 		),
@@ -113,14 +113,14 @@ func GetGrpcConnByDomain(ctx context.Context, service string, log *logrus.Entry)
 		grpc.WithUnaryInterceptor(
 			grpc_middleware.ChainUnaryClient(
 				grpc_logrus.UnaryClientInterceptor(log),
-				grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
+				//grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
 				grpc_requestid.UnaryClientInterceptor(log),
 			),
 		),
 		grpc.WithStreamInterceptor(
 			grpc_middleware.ChainStreamClient(
 				grpc_logrus.StreamClientInterceptor(log),
-				grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
+				//grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
 				grpc_requestid.StreamClientInterceptor(log),
 			),
 		),
@@ -143,7 +143,7 @@ func GetGrpcClientConn(ctx context.Context, conf *configfile.Config, service str
 	if err != nil {
 		return nil, errors.Wrap(err, "kv.get error")
 	}
-	log.Infof("get service:%s return resp:%+v, count:%d", service, resp, resp.Count)
+	//log.Infof("get service:%s return resp:%+v, count:%d", service, resp, resp.Count)
 	if resp.Count > 0 {
 		grpcConn, err := GetGrpcConnByEtcd(ctx, service, cli, log)
 		if err != nil {

@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package product;
+
+// Interface exported by the server.
+service Product {
+  // Validate Product
+  rpc GetProduct(GetProductRequest) returns (ProductResponse) {}
+
+}
+
+// GetProductRequest
+message GetProductRequest {
+  string productID = 1;
+  
+}
+
+
+message ProductResponse { 
+  string productID = 1;
+  string productName = 2;
+  string ProductPrice = 3;
+  Result result = 4;
+}
+// 返回码与返回状态
+message Result {
+	int64 code = 1;
+	string msg = 2;
+}

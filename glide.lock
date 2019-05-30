@@ -1,5 +1,5 @@
 hash: 42333b2a6aa9ee2361ac232cb5f8498f50d17912e10fd6d6afcef12fff177569
-updated: 2019-05-16T10:59:52.019269+08:00
+updated: 2019-05-30T11:42:15.840117+08:00
 imports:
 - name: github.com/BurntSushi/toml
   version: 99064174e013895bbd9b025c31100bd1d9b590ca
@@ -13,6 +13,8 @@ imports:
   - etcdserver/etcdserverpb
   - mvcc/mvccpb
   - pkg/types
+- name: github.com/go-sql-driver/mysql
+  version: 665b83488b90b902ce0a305ef6652e599771cdf9
 - name: github.com/gogo/protobuf
   version: 342cbe0a04158f6dcb03ca0079991a51a4248c02
   subpackages:
@@ -28,6 +30,7 @@ imports:
   subpackages:
   - jsonpb
   - proto
+  - protoc-gen-go/descriptor
   - ptypes
   - ptypes/any
   - ptypes/duration
@@ -47,10 +50,16 @@ imports:
   - util/metautils
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jmoiron/sqlx
+  version: 5f97679e23f75f42b265fec8d3bdb1c8de90b79d
+  subpackages:
+  - reflectx
 - name: github.com/pkg/errors
   version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
 - name: github.com/satori/go.uuid
   version: b061729afc07e77a8aa4fad0a2fd840958f1942a
+- name: github.com/shopspring/decimal
+  version: d6f52241f332c63811249bd79a522406bea1a7c9
 - name: github.com/sirupsen/logrus
   version: f006c2ac4710855cf0f916dd6b77acf6b048dc6e
 - name: github.com/spf13/cobra
@@ -90,7 +99,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 25c4f928eaa6d96443009bd842389fb4fa48664e
+  version: 869adfc8d5a43efc0d05780ad109106f457f51e4
   subpackages:
   - balancer
   - balancer/base
@@ -120,6 +129,8 @@ imports:
   - metadata
   - naming
   - peer
+  - reflection
+  - reflection/grpc_reflection_v1alpha
   - resolver
   - resolver/dns
   - resolver/passthrough

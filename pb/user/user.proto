@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package user;
+
+// Interface exported by the server.
+service User {
+  // Validate User
+  rpc GetUser(GetUserRequest) returns (UserResponse) {}
+
+}
+
+// GetUserRequest
+message GetUserRequest {
+  string userID = 1;
+}
+
+
+message UserResponse{
+  string userID = 1;
+  string userName = 2;
+  Result result = 3;
+}
+// 返回码与返回状态
+message Result {
+	int64 code = 1;
+	string msg = 2;
+}

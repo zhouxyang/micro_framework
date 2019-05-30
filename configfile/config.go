@@ -15,9 +15,24 @@ type Config struct {
 	EtcdHost   string
 	EtcdPort   int
 
-	JSONDBFile string
-	MyService  struct {
+	JSONDBFile   string
+	RouteService struct {
 		ExternalServiceName string
+	}
+	OrderService struct {
+		OrderDB        string
+		UserService    string
+		ProductService string
+		BalanceService string
+	}
+	UserService struct {
+		UserDB string
+	}
+	ProductService struct {
+		ProductDB string
+	}
+	BalanceService struct {
+		BalanceDB string
 	}
 }
 

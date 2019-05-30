@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package order;
+
+// Interface exported by the server.
+service Order {
+	// order create
+	rpc CreateOrder(OrderCreateRequest) returns (OrderResponse) {}
+
+	// order query
+	rpc QueryOrder(OrderQueryRequest) returns (OrderResponse) {}
+
+}
+
+// OrderCreateRequest
+message OrderCreateRequest {
+	string userID = 1;
+	repeated string productID = 2;
+
+}
+
+message OrderQueryRequest {
+	string orderID = 1;
+}
+
+// OrderResponse
+message OrderResponse {
+	OrderMsg orderMsg = 1;
+	Result result = 2;
+ 	string Balance =3;
+}
+
+message OrderMsg {
+	string orderID = 1;
+	string createTime = 2;
+	string totolMoney = 3;
+	repeated string productID = 4;
+}
+
+// 返回码与返回状态
+message Result {
+	int64 code = 1;
+	string msg = 2;
+}

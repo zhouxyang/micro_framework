@@ -5,7 +5,7 @@ metadata:
     labels:
         app: micro-framework  # 为所有 Pod 都打上这个标签
 spec:
-    replicas: 2
+    replicas: 1
     template:
         metadata:
             labels:

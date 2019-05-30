@@ -23,7 +23,11 @@ import (
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_requestid "route_guide/middleware/grpc_requestid"
 
+	_ "route_guide/cmd/balance"
+	_ "route_guide/cmd/order"
+	_ "route_guide/cmd/product"
 	_ "route_guide/cmd/route"
+	_ "route_guide/cmd/user"
 )
 
 var version string
@@ -90,19 +94,23 @@ func start(filename string, reload bool) error {
 	if err != nil {
 		return err
 	}
-	log.Infof("%+v", *conf)
+	//log.Infof("%+v", *conf)
 	var lis net.Listener
 	if reload {
 		f := os.NewFile(3, "")
 		lis, err = net.FileListener(f)
+		if err != nil {
+			return err
+		}
 	} else {
 		lis, err = net.Listen("tcp", fmt.Sprintf("%s:%d", conf.Host, conf.Port))
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
+			return err
 		}
 	}
 	if err := registerEtcd(log, conf); err != nil {
-		return nil
+		return err
 	}
 	startServer(log, lis, conf)
 	return nil
@@ -162,7 +170,9 @@ func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
 
 	// 初始化并注册提供的微服务
 	for _, initServer := range cmd.ServerDrivers {
-		initServer(grpcServer, conf)
+		if err := initServer(grpcServer, conf); err != nil {
+			log.Infof("initServer error:%v", err)
+		}
 	}
 	// 优雅关闭以及热重启
 	c := make(chan os.Signal, 1)

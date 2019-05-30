@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+	//	"google.golang.org/grpc/reflection"
 
 	pb "route_guide/routeguide"
 )
@@ -39,7 +39,7 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 	}
 	pb.RegisterRouteGuideServer(grpcServer, srv)
 	// Register reflection service on gRPC server.
-	reflection.Register(grpcServer)
+	//reflection.Register(grpcServer)
 	return nil
 }
 
@@ -81,7 +81,7 @@ func (s *GuideServer) GetFeature(ctx context.Context, point *pb.Point) (*pb.Feat
 	for _, feature := range s.savedFeatures {
 		if proto.Equal(feature.Location, point) {
 			log.Infof("GetFeatureSucc")
-			conn, err := cmd.GetGrpcClientConn(ctx, s.config, s.config.MyService.ExternalServiceName, log)
+			conn, err := cmd.GetGrpcClientConn(ctx, s.config, s.config.RouteService.ExternalServiceName, log)
 			if err != nil {
 				log.Infof("GetEtcdClient error:%v", err)
 				return feature, nil
