@@ -18,7 +18,7 @@ func (dao *OrderDao) InsertOrder(log *logrus.Entry, order *db.Order) error {
 
 	query := `INSERT IGNORE INTO Orders(orderid, product_price, create_time, productid) VALUES (?, ?, ?, ?)`
 
-	_, err := dao.Exec(log, query, order.OrderID, order.OrderPrice.String(), order.CreateTime, order.ProductID)
+	_, err := dao.Exec(log, query, order.OrderID, order.ProductPrice.String(), order.CreateTime, order.ProductID)
 	if err != nil {
 		return errors.Wrap(err, "insert Order")
 	}
@@ -26,9 +26,9 @@ func (dao *OrderDao) InsertOrder(log *logrus.Entry, order *db.Order) error {
 }
 
 func (dao *OrderDao) GetOrderByOrderID(log *logrus.Entry, orderid string) ([]*db.Order, error) {
-	query := `SELECT orderid, product_price, create_time, productid FROM Orders`
+	query := `SELECT orderid, product_price, create_time, productid FROM Orders WHERE orderid = ?`
 	orders := []*db.Order{}
-	err := dao.Select(log, &orders, query)
+	err := dao.Select(log, &orders, query, orderid)
 
 	switch {
 	case err != nil:

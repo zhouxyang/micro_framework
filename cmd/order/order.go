@@ -52,7 +52,7 @@ type OrderServer struct {
 func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateRequest) (*pb.OrderResponse, error) {
 	log := cmd.GetLog(ctx)
 	u1 := uuid.NewV4().String()
-	response := &pb.OrderResponse{
+	orderResponse := &pb.OrderResponse{
 		OrderMsg: &pb.OrderMsg{
 			OrderID:    u1,
 			ProductID:  make([]string, 0, len(req.ProductID)),
@@ -78,7 +78,8 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 	defer conn.Close()
 	userClient := user.NewUserClient(conn.GrpcConn)
 	userParam := &user.GetUserRequest{UserID: req.UserID}
-	res, err := userClient.GetUser(ctx, userParam)
+	userRes := &user.UserResponse{}
+	userRes, err = userClient.GetUser(ctx, userParam)
 	if err != nil {
 		log.Infof("userClient.GetUser error:%v", err)
 		return &pb.OrderResponse{
@@ -88,8 +89,8 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 			},
 		}, err
 	}
-	if res.Result.Code != 1000 {
-		log.Infof("userClient.GetUser return code:%v, msg:%v", res.Result.Code, res.Result.Msg)
+	if userRes.Result.Code != 1000 {
+		log.Infof("userClient.GetUser return code:%v, msg:%v", userRes.Result.Code, userRes.Result.Msg)
 		return &pb.OrderResponse{
 			Result: &pb.Result{
 				Code: 5001,
@@ -97,8 +98,8 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 			},
 		}, err
 	}
-	log.Infof("get userid:%v, username: %v", res.UserID, res.UserName)
-	// 2. check product
+	log.Infof("get userid:%v, username: %v", userRes.UserID, userRes.UserName)
+	// 2. check product async
 	conn, err = cmd.GetGrpcClientConn(ctx, s.config, s.config.OrderService.ProductService, log)
 	if err != nil {
 		log.Infof("GetEtcdClient error:%v", err)
@@ -106,20 +107,33 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 	}
 	defer conn.Close()
 
-	productIDMap := make(map[string]string)
-	for _, productID := range req.ProductID {
-		productClient := product.NewProductClient(conn.GrpcConn)
-		productParam := &product.GetProductRequest{ProductID: productID}
-		res, err := productClient.GetProduct(ctx, productParam)
-		if err != nil {
-			log.Infof("product.GetProduct error:%v", err)
-			return &pb.OrderResponse{Result: &pb.Result{Code: 5000, Msg: "productid is invalid"}}, err
-		}
-		if res.Result.Code != 1000 {
-			log.Infof("productClient.GetProduct return code:%v, msg:%v", res.Result.Code, res.Result.Msg)
-			continue
-		}
-		productIDMap[res.ProductID] = res.ProductPrice
+	productClient := product.NewProductClient(conn.GrpcConn)
+	prdChan := make(chan *db.Product, len(req.ProductID))
+	for _, prdID := range req.ProductID {
+		go func(productID string) {
+			prd := &db.Product{}
+			defer func() {
+				prdChan <- prd
+			}()
+			productParam := &product.GetProductRequest{ProductID: productID}
+			productRes, err := productClient.GetProduct(ctx, productParam)
+			if err != nil {
+				log.Infof("product.GetProduct error:%v", err)
+				return
+			}
+			if productRes.Result.Code != 1000 {
+				log.Infof("productClient.GetProduct return code:%v, msg:%v", productRes.Result.Code, productRes.Result.Msg)
+				return
+			}
+
+			priceDecimal, err := decimal.NewFromString(productRes.ProductPrice)
+			if err != nil {
+				log.Infof("decimal.NewFromString error:%v", err)
+				return
+			}
+			prd.ProductPrice = priceDecimal
+			prd.ProductID = productRes.ProductID
+		}(prdID)
 	}
 
 	// 3. deduct
@@ -138,16 +152,16 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 		return &pb.OrderResponse{Result: &pb.Result{Code: 5004, Msg: "deduct error"}}, err
 	}
 	total := decimal.Zero
-	for id, price := range productIDMap {
-		priceDecimal, err := decimal.NewFromString(price)
-		if err != nil {
-			log.Infof("decimal.NewFromString error:%v", err)
+	for i := 0; i < len(req.ProductID); i++ {
+		prd := <-prdChan
+		id, priceDecimal := prd.ProductID, prd.ProductPrice
+		if id == "" {
 			continue
 		}
 		deduct := &balance.DeductRequest{
 			UserID:    userID,
 			ProductID: id,
-			Price:     price,
+			Price:     priceDecimal.String(),
 		}
 		if err := stream.Send(deduct); err != nil {
 			log.Infof("Failed to send a deduct: %v", err)
@@ -156,16 +170,16 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 
 		// 入库order表
 		o := db.Order{
-			ProductID:  id,
-			OrderPrice: priceDecimal,
-			OrderID:    u1,
-			CreateTime: sql.NullTime{Time: time.Now(), Valid: true},
+			ProductID:    id,
+			ProductPrice: priceDecimal,
+			OrderID:      u1,
+			CreateTime:   sql.NullTime{Time: time.Now(), Valid: true},
 		}
 		if err := s.OrderDao.InsertOrder(log, &o); err != nil {
 			log.Infof("OrderDao.InsertOrder error:%v", err)
 			continue
 		}
-		response.OrderMsg.ProductID = append(response.OrderMsg.ProductID, id)
+		orderResponse.OrderMsg.ProductID = append(orderResponse.OrderMsg.ProductID, id)
 		total = total.Add(priceDecimal)
 	}
 	reply, err := stream.CloseAndRecv()
@@ -177,15 +191,15 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 		log.Infof("reply.Result.Code return code:%v, msg:%v", reply.Result.Code, reply.Result.Msg)
 		return &pb.OrderResponse{Result: &pb.Result{Code: 5004, Msg: "deduct error"}}, nil
 	}
-	response.OrderMsg.TotolMoney = total.String()
-	response.Balance = reply.Balance
-	return response, nil
+	orderResponse.OrderMsg.TotolMoney = total.String()
+	orderResponse.Balance = reply.Balance
+	return orderResponse, nil
 }
 
 func (s *OrderServer) QueryOrder(ctx context.Context, req *pb.OrderQueryRequest) (*pb.OrderResponse, error) {
 	log := cmd.GetLog(ctx)
 
-	response := &pb.OrderResponse{
+	orderResponse := &pb.OrderResponse{
 		OrderMsg: &pb.OrderMsg{
 			OrderID:   req.OrderID,
 			ProductID: make([]string, 0, 8),
@@ -202,9 +216,11 @@ func (s *OrderServer) QueryOrder(ctx context.Context, req *pb.OrderQueryRequest)
 	}
 	total := decimal.Zero
 	for _, o := range orders {
-		total = total.Add(o.OrderPrice)
-		response.OrderMsg.CreateTime = o.CreateTime.Time.String()
-		response.OrderMsg.ProductID = append(response.OrderMsg.ProductID, o.ProductID)
+		total = total.Add(o.ProductPrice)
+		orderResponse.OrderMsg.CreateTime = o.CreateTime.Time.String()
+		orderResponse.OrderMsg.ProductID = append(orderResponse.OrderMsg.ProductID, o.ProductID)
+
 	}
-	return response, nil
+	orderResponse.OrderMsg.TotolMoney = total.String()
+	return orderResponse, nil
 }

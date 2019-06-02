@@ -45,7 +45,10 @@ type UserServer struct {
 func (s *UserServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UserResponse, error) {
 	log := cmd.GetLog(ctx)
 	user, err := s.UserDao.GetUserByUserID(log, req.UserID)
-	if err != nil || user == nil {
+	if err != nil {
+		return &pb.UserResponse{Result: &pb.Result{Code: 5003, Msg: "db error"}}, err
+	}
+	if user == nil {
 		return &pb.UserResponse{Result: &pb.Result{Code: 5001, Msg: "userid not found"}}, err
 	}
 	log.Infof("get user:%+v from db", req)

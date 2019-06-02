@@ -44,8 +44,11 @@ type ProductServer struct {
 func (s *ProductServer) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.ProductResponse, error) {
 	log := cmd.GetLog(ctx)
 	product, err := s.ProductDao.GetProductByProductID(log, req.ProductID)
-	if err != nil || product == nil {
-		return &pb.ProductResponse{Result: &pb.Result{Code: 5000, Msg: "not found"}}, err
+	if err != nil {
+		return &pb.ProductResponse{Result: &pb.Result{Code: 5003, Msg: "db error"}}, err
+	}
+	if product == nil {
+		return &pb.ProductResponse{Result: &pb.Result{Code: 5000, Msg: "productid is invalid"}}, err
 	}
 	log.Infof("get product:%+v from db", product)
 	return &pb.ProductResponse{

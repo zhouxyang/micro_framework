@@ -9,7 +9,7 @@
 
 ## 创建etcd集群
 1. kubectl create -f etcd-cluster.yaml
-2. kubectl crreate -f etcd-deployment.yaml 
+2. kubectl create -f etcd-deployment.yaml 
 3. 如果要在集群外访问etcd，还需要 kubectl create -f etcd-client-service-lb.yaml
 
 ## 创建micro_framework服务

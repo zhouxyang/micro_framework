@@ -17,19 +17,19 @@ JSONDBFile = "testdata/route_guide_db.json"
 
 [UserService] 
 	# 数据库配置
-	UserDB = "root:test@tcp(10.249.155.239:3307)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
+	UserDB = "root:test@tcp(mysql-svc:3306)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
 	
 [ProductService]
 	# 数据库配置
-	ProductDB = "root:test@tcp(10.249.155.239:3307)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
+	ProductDB = "root:test@tcp(mysql-svc:3306)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
 
 [BalanceService]
 	# 数据库配置
-	BalanceDB = "root:test@tcp(10.249.155.239:3307)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
+	BalanceDB = "root:test@tcp(mysql-svc:3306)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
 
 [OrderService]
 	# 数据库配置
-	OrderDB = "root:test@tcp(10.249.155.239:3307)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
+	OrderDB = "root:test@tcp(mysql-svc:3306)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
 	# 用户管理
 	UserService = "MyService"
 	# 商品管理

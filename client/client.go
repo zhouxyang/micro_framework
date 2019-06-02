@@ -15,6 +15,16 @@ import (
 	"route_guide/pb/order"
 )
 
+/*
+返回码对照表：
+1000, ok
+5000, productid is invalid
+5001, userid is invalid
+5002, internal error
+5003, db error
+5004, deduct error
+*/
+
 var (
 	serverAddr = flag.String("server_addr", "127.0.0.1:10000", "The server address in the format of host:port")
 )
@@ -52,38 +62,41 @@ func main() {
 	creds, err := credentials.NewClientTLSFromFile("./script/server.crt", "")
 	if err != nil {
 		log.Fatalf("fail to new: %v", err)
+		return
 	}
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 	conn, gerr := grpc.Dial(*serverAddr, opts...)
 	if gerr != nil {
 		log.Fatalf("fail to dial: %v", gerr)
+		return
 	}
 	defer conn.Close()
 	client := order.NewOrderClient(conn)
 
 	// Looking for a valid feature
-	req := &order.OrderCreateRequest{
+	createReq := &order.OrderCreateRequest{
 		UserID:    "123",
 		ProductID: []string{"1", "2", "3"},
 	}
-	resp, err := client.CreateOrder(context.Background(), req)
+	createResp, err := client.CreateOrder(context.Background(), createReq)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatalf("fail to CreateOrder:%v", err)
 		return
 	}
-	fmt.Printf("%+v\n", resp.OrderMsg)
-	fmt.Printf("%+v\n", resp.Result)
-	fmt.Printf("%+v\n", resp.Balance)
-	// Feature missing.
-	//printFeature(client, &pb.Point{Latitude: 0, Longitude: 0})
-	// Looking for features between 40, -75 and 42, -73.
-	/*printFeatures(client, &pb.Rectangle{
-		Lo: &pb.Point{Latitude: 400000000, Longitude: -750000000},
-		Hi: &pb.Point{Latitude: 420000000, Longitude: -730000000},
-	})*/
-	// RecordRoute
-	//runRecordRoute(client)
+	fmt.Printf("%+v\n", createResp.OrderMsg)
+	fmt.Printf("%+v\n", createResp.Result)
+	fmt.Printf("%+v\n", createResp.Balance)
 
-	// RouteChat
-	//runRouteChat(client)
+	queryReq := &order.OrderQueryRequest{
+		OrderID: createResp.OrderMsg.OrderID,
+	}
+	queryResp, err := client.QueryOrder(context.Background(), queryReq)
+	if err != nil {
+		log.Fatalf("fail to QueryOrder:%v", err)
+		return
+	}
+
+	fmt.Printf("%+v\n", queryResp.OrderMsg)
+	fmt.Printf("%+v\n", queryResp.Result)
+	fmt.Printf("%+v\n", queryResp.Balance)
 }
