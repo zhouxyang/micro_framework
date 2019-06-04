@@ -9,11 +9,8 @@ EtcdHost="etcd-cluster-client"
 #EtcdHost="127.0.0.1"
 EtcdPort=2379
 
-# 日志路径映射到tail -f /tmp/log/route_guide.log
-LogPath="/tmp/route_guide.log"
-
-
-JSONDBFile = "testdata/route_guide_db.json"
+# 日志路径映射到tail -f /tmp/log/micro_framework.log
+LogPath="/tmp/micro_framework.log"
 
 [UserService] 
 	# 数据库配置
@@ -30,14 +27,9 @@ JSONDBFile = "testdata/route_guide_db.json"
 [OrderService]
 	# 数据库配置
 	OrderDB = "root:test@tcp(mysql-svc:3306)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
-	# 用户管理
+	# 用户管理  单集群时为上面的ServerName，多集群时为域名
 	UserService = "MyService"
-	# 商品管理
+	# 商品管理,集群时为上面的ServerName，多集群时为域名
 	ProductService = "MyService"
-	# 结算管理
+	# 结算管理,集群时为上面的ServerName，多集群时为域名
 	BalanceService = "MyService"
-
-[RouteService]
-	# 单集群时为上面的ServerName，多集群时为域名
-	ExternalServiceName = "MyService"
-	

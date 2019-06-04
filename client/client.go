@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	//"google.golang.org/grpc/metadata"
-	"route_guide/pb/order"
+	"micro_framework/pb/order"
 )
 
 /*
@@ -59,7 +59,7 @@ func main() {
 		//此处是明文传输 即plaintext
 		opts = append(opts, grpc.WithInsecure())
 	*/
-	creds, err := credentials.NewClientTLSFromFile("./script/server.crt", "")
+	creds, err := credentials.NewClientTLSFromFile("./script/ingress/server.crt", "")
 	if err != nil {
 		log.Fatalf("fail to new: %v", err)
 		return

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"route_guide/configfile"
+	"micro_framework/configfile"
 	"sync"
 
 	"google.golang.org/grpc"

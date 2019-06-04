@@ -2,15 +2,15 @@ package balance
 
 import (
 	"io"
-	"route_guide/cmd"
-	"route_guide/configfile"
-	"route_guide/db/mysql"
+	"micro_framework/cmd"
+	"micro_framework/configfile"
+	"micro_framework/db/mysql"
 
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
 
-	pb "route_guide/pb/balance"
+	pb "micro_framework/pb/balance"
 )
 
 func init() {

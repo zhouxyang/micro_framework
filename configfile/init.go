@@ -5,7 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/pkg/errors"
 	"net/url"
-	"route_guide/db"
+	"micro_framework/db"
 	"strings"
 	"time"
 )

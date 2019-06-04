@@ -7,8 +7,8 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"route_guide/cmd"
-	"route_guide/configfile"
+	"micro_framework/cmd"
+	"micro_framework/configfile"
 	"syscall"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -21,13 +21,12 @@ import (
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
-	grpc_requestid "route_guide/middleware/grpc_requestid"
+	grpc_requestid "micro_framework/middleware/grpc_requestid"
 
-	_ "route_guide/cmd/balance"
-	_ "route_guide/cmd/order"
-	_ "route_guide/cmd/product"
-	_ "route_guide/cmd/route"
-	_ "route_guide/cmd/user"
+	_ "micro_framework/cmd/balance"
+	_ "micro_framework/cmd/order"
+	_ "micro_framework/cmd/product"
+	_ "micro_framework/cmd/user"
 )
 
 var version string

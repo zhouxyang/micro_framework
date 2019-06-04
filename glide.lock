@@ -111,8 +111,6 @@ imports:
   - credentials/internal
   - encoding
   - encoding/proto
-  - examples/route_guide/mock_routeguide
-  - examples/route_guide/routeguide
   - grpclog
   - health/grpc_health_v1
   - internal

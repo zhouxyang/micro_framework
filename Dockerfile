@@ -1,6 +1,6 @@
 FROM golang:1.9.2
 
-ENV path /go/src/route_guide
+ENV path /go/src/micro_framework
 WORKDIR ${path}
 COPY . ${path}
 

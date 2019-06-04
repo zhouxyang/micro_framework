@@ -5,7 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/shopspring/decimal"
 	"github.com/sirupsen/logrus"
-	"route_guide/db"
+	"micro_framework/db"
 )
 
 // BalanceDao access to Balance

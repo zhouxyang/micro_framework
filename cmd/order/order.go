@@ -3,10 +3,10 @@ package order
 import (
 	"context"
 	sql "github.com/go-sql-driver/mysql"
-	"route_guide/cmd"
-	"route_guide/configfile"
-	"route_guide/db"
-	"route_guide/db/mysql"
+	"micro_framework/cmd"
+	"micro_framework/configfile"
+	"micro_framework/db"
+	"micro_framework/db/mysql"
 	"time"
 
 	"github.com/satori/go.uuid"
@@ -14,10 +14,10 @@ import (
 	"google.golang.org/grpc"
 	//"google.golang.org/grpc/reflection"
 
-	"route_guide/pb/balance"
-	pb "route_guide/pb/order"
-	"route_guide/pb/product"
-	"route_guide/pb/user"
+	"micro_framework/pb/balance"
+	pb "micro_framework/pb/order"
+	"micro_framework/pb/product"
+	"micro_framework/pb/user"
 )
 
 func init() {

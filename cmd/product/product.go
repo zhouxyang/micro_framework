@@ -2,14 +2,14 @@ package product
 
 import (
 	"context"
-	"route_guide/cmd"
-	"route_guide/configfile"
-	"route_guide/db/mysql"
+	"micro_framework/cmd"
+	"micro_framework/configfile"
+	"micro_framework/db/mysql"
 
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
 
-	pb "route_guide/pb/product"
+	pb "micro_framework/pb/product"
 )
 
 func init() {

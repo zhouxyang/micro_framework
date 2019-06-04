@@ -3,7 +3,7 @@ package mysql
 import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"route_guide/db"
+	"micro_framework/db"
 )
 
 // OrderDao access to Order

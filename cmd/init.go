@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"route_guide/configfile"
-	"route_guide/pkg/caller"
+	"micro_framework/configfile"
+	"micro_framework/pkg/caller"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
@@ -18,7 +18,7 @@ import (
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	//grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
-	grpc_requestid "route_guide/middleware/grpc_requestid"
+	grpc_requestid "micro_framework/middleware/grpc_requestid"
 )
 
 func InitGrpcLog(filename string) (*logrus.Entry, error) {

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"route_guide/db"
+	"micro_framework/db"
 )
 
 // ProductDao access to Product
