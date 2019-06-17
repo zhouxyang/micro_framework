@@ -74,9 +74,9 @@ func (s *BalanceServer) Deduct(stream pb.Balance_DeductServer) error {
 			log.Infof("s.BalanceDao.GetBalanceByUserID:%v", err)
 			continue
 		}
-		decimalPrice, err := decimal.NewFromString(req.Price)
-		if err != nil {
-			log.Infof("decimal.NewFromString error:%v", err)
+		decimalPrice, aerr := decimal.NewFromString(req.Price)
+		if aerr != nil {
+			log.Infof("decimal.NewFromString error:%v", aerr)
 			continue
 		}
 		//2. 进行余额扣除
