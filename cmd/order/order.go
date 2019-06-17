@@ -6,9 +6,9 @@ import (
 	"micro_framework/cmd"
 	"micro_framework/configfile"
 	"micro_framework/db"
-	"micro_framework/db/mysql"
 	"time"
 
+	"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
@@ -28,13 +28,15 @@ func init() {
 
 // InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
-	myDB, err := configfile.InitDB(config.OrderService.OrderDB)
+	myDB, err := gorm.Open("mysql", config.OrderService.OrderDB)
 	if err != nil {
 		return err
 	}
+	myDB.AutoMigrate(&db.Product{})
+	myDB.LogMode(true)
 	srv := &OrderServer{
 		config:   config,
-		OrderDao: &mysql.OrderDao{MyDB: myDB},
+		OrderDao: myDB,
 	}
 	pb.RegisterOrderServer(grpcServer, srv)
 	// Register reflection service on gRPC server.
@@ -44,13 +46,14 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 
 // OrderServer 自定义服务结构体
 type OrderServer struct {
-	*mysql.OrderDao
-	config *configfile.Config
+	OrderDao *gorm.DB
+	config   *configfile.Config
 }
 
 // CreateOrder
 func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateRequest) (*pb.OrderResponse, error) {
 	log := cmd.GetLog(ctx)
+	s.OrderDao.SetLogger(log)
 	u1 := uuid.NewV4().String()
 	orderResponse := &pb.OrderResponse{
 		OrderMsg: &pb.OrderMsg{
@@ -170,13 +173,13 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 
 		// 入库order表
 		o := db.Order{
-			ProductID:    id,
-			ProductPrice: priceDecimal,
-			OrderID:      u1,
-			CreateTime:   sql.NullTime{Time: time.Now(), Valid: true},
+			ProductID:  id,
+			OrderID:    u1,
+			CreateTime: sql.NullTime{Time: time.Now(), Valid: true},
 		}
-		if err := s.OrderDao.InsertOrder(log, &o); err != nil {
-			log.Infof("OrderDao.InsertOrder error:%v", err)
+		o.ProductPrice, _ = priceDecimal.Float64()
+		if err := s.OrderDao.Create(&o).Error; err != nil {
+			log.Infof("Failed to insert order: %v", err)
 			continue
 		}
 		orderResponse.OrderMsg.ProductID = append(orderResponse.OrderMsg.ProductID, id)
@@ -198,7 +201,7 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 
 func (s *OrderServer) QueryOrder(ctx context.Context, req *pb.OrderQueryRequest) (*pb.OrderResponse, error) {
 	log := cmd.GetLog(ctx)
-
+	s.OrderDao.SetLogger(log)
 	orderResponse := &pb.OrderResponse{
 		OrderMsg: &pb.OrderMsg{
 			OrderID:   req.OrderID,
@@ -209,14 +212,14 @@ func (s *OrderServer) QueryOrder(ctx context.Context, req *pb.OrderQueryRequest)
 			Msg:  "OK",
 		},
 	}
-	orders, err := s.OrderDao.GetOrderByOrderID(log, req.OrderID)
-	if err != nil {
-		log.Infof("s.QueryTable error:%v", err)
-		return &pb.OrderResponse{Result: &pb.Result{Code: 5004, Msg: "deduct error"}}, err
+
+	orders := make([]db.Order, 0, 8)
+	if err := s.OrderDao.Find(&orders, "orderid=?", req.OrderID).Error; err != nil {
+		return &pb.OrderResponse{Result: &pb.Result{Code: 5004, Msg: "query order error"}}, err
 	}
 	total := decimal.Zero
 	for _, o := range orders {
-		total = total.Add(o.ProductPrice)
+		total = total.Add(decimal.NewFromFloat(o.ProductPrice))
 		orderResponse.OrderMsg.CreateTime = o.CreateTime.Time.String()
 		orderResponse.OrderMsg.ProductID = append(orderResponse.OrderMsg.ProductID, o.ProductID)
 

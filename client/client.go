@@ -23,6 +23,7 @@ import (
 5002, internal error
 5003, db error
 5004, deduct error
+5005, balance is not enough
 */
 
 var (

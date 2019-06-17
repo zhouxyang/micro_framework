@@ -4,8 +4,9 @@ import (
 	"context"
 	"micro_framework/cmd"
 	"micro_framework/configfile"
-	"micro_framework/db/mysql"
+	"micro_framework/db"
 
+	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
 
@@ -20,13 +21,15 @@ func init() {
 
 // InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
-	myDB, err := configfile.InitDB(config.ProductService.ProductDB)
+	myDB, err := gorm.Open("mysql", config.ProductService.ProductDB)
 	if err != nil {
 		return err
 	}
+	myDB.AutoMigrate(&db.Product{})
+	myDB.LogMode(true)
 	srv := &ProductServer{
 		config:     config,
-		ProductDao: &mysql.ProductDao{MyDB: myDB},
+		ProductDao: myDB,
 	}
 	pb.RegisterProductServer(grpcServer, srv)
 	// Register reflection service on gRPC server.
@@ -36,18 +39,16 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 
 // ProductServer 自定义服务结构体
 type ProductServer struct {
-	*mysql.ProductDao
-	config *configfile.Config
+	ProductDao *gorm.DB
+	config     *configfile.Config
 }
 
 //GetProduct 校验用户
 func (s *ProductServer) GetProduct(ctx context.Context, req *pb.GetProductRequest) (*pb.ProductResponse, error) {
 	log := cmd.GetLog(ctx)
-	product, err := s.ProductDao.GetProductByProductID(log, req.ProductID)
-	if err != nil {
-		return &pb.ProductResponse{Result: &pb.Result{Code: 5003, Msg: "db error"}}, err
-	}
-	if product == nil {
+	s.ProductDao.SetLogger(log)
+	var product db.Product
+	if err := s.ProductDao.Find(&product, "productid=?", req.ProductID).Error; err != nil {
 		return &pb.ProductResponse{Result: &pb.Result{Code: 5000, Msg: "productid is invalid"}}, err
 	}
 	log.Infof("get product:%+v from db", product)

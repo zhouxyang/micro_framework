@@ -4,8 +4,9 @@ import (
 	"io"
 	"micro_framework/cmd"
 	"micro_framework/configfile"
-	"micro_framework/db/mysql"
+	"micro_framework/db"
 
+	"github.com/jinzhu/gorm"
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
@@ -21,13 +22,15 @@ func init() {
 
 // InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
-	myDB, err := configfile.InitDB(config.BalanceService.BalanceDB)
+	myDB, err := gorm.Open("mysql", config.BalanceService.BalanceDB)
 	if err != nil {
 		return err
 	}
+	myDB.AutoMigrate(&db.Balance{})
+	myDB.LogMode(true)
 	srv := &BalanceServer{
 		config:     config,
-		BalanceDao: &mysql.BalanceDao{MyDB: myDB},
+		BalanceDao: myDB,
 	}
 	pb.RegisterBalanceServer(grpcServer, srv)
 	// Register reflection service on gRPC server.
@@ -37,14 +40,15 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 
 // BalanceServer 自定义服务结构体
 type BalanceServer struct {
-	*mysql.BalanceDao
-	config *configfile.Config
+	BalanceDao *gorm.DB
+	config     *configfile.Config
 }
 
 //Deduct 客户端流方式
 func (s *BalanceServer) Deduct(stream pb.Balance_DeductServer) error {
 	balance := decimal.Zero
 	log := cmd.GetLog(stream.Context())
+	s.BalanceDao.SetLogger(log)
 	for {
 		req, err := stream.Recv()
 		if err == io.EOF {
@@ -65,8 +69,8 @@ func (s *BalanceServer) Deduct(stream pb.Balance_DeductServer) error {
 			})
 		}
 		//1. 先查询余额
-		b, err := s.BalanceDao.GetBalanceByUserID(log, req.UserID)
-		if err != nil {
+		b := db.Balance{}
+		if err := s.BalanceDao.Find(&b, "userid=?", req.UserID).Error; err != nil {
 			log.Infof("s.BalanceDao.GetBalanceByUserID:%v", err)
 			continue
 		}
@@ -76,11 +80,22 @@ func (s *BalanceServer) Deduct(stream pb.Balance_DeductServer) error {
 			continue
 		}
 		//2. 进行余额扣除
-		b.Balance = b.Balance.Sub(decimalPrice)
-		if err := s.BalanceDao.UpdateBalanceByUserID(log, req.UserID, b.Balance); err != nil {
+		decimalBalance := decimal.NewFromFloat(b.Balance)
+		decimalBalance = decimalBalance.Sub(decimalPrice)
+		if decimalBalance.Cmp(decimal.Zero) < 0 {
+			return stream.SendAndClose(&pb.DeductResponse{
+				Result: &pb.Result{
+					Code: 5005,
+					Msg:  "balance is not enough",
+				},
+			})
+
+		}
+		b.Balance, _ = decimalBalance.Float64()
+		if err := s.BalanceDao.Save(&b).Error; err != nil {
 			log.Infof("s.Update error:%v", err)
 			continue
 		}
-		balance = b.Balance
+		balance = decimalBalance
 	}
 }

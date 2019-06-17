@@ -1,5 +1,5 @@
-hash: 42333b2a6aa9ee2361ac232cb5f8498f50d17912e10fd6d6afcef12fff177569
-updated: 2019-05-30T11:42:15.840117+08:00
+hash: 1eb23e92ec0b22e978a7f27322f9b8e61cfc39639ca2f26adb22ae4c5395975f
+updated: 2019-06-17T15:59:31.572094+08:00
 imports:
 - name: github.com/BurntSushi/toml
   version: 99064174e013895bbd9b025c31100bd1d9b590ca
@@ -30,26 +30,28 @@ imports:
   subpackages:
   - jsonpb
   - proto
-  - protoc-gen-go/descriptor
   - ptypes
   - ptypes/any
   - ptypes/duration
   - ptypes/struct
   - ptypes/timestamp
 - name: github.com/grpc-ecosystem/go-grpc-middleware
-  version: cfaf5686ec79ff8344257723b6f5ba1ae0ffeb4d
+  version: 27f3801344b24dd6e9c608692368947f674a8298
   subpackages:
   - logging
   - logging/logrus
   - logging/logrus/ctxlogrus
   - recovery
-  - retry
   - tags
   - tags/logrus
-  - util/backoffutils
-  - util/metautils
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jinzhu/gorm
+  version: 01b66011427614f01e84a473b0303c917179f2a0
+  subpackages:
+  - dialects/mysql
+- name: github.com/jinzhu/inflection
+  version: f5c5f50e6090ae76a29240b61ae2a90dd810112e
 - name: github.com/jmoiron/sqlx
   version: 5f97679e23f75f42b265fec8d3bdb1c8de90b79d
   subpackages:
@@ -99,7 +101,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 869adfc8d5a43efc0d05780ad109106f457f51e4
+  version: 501c41df7f472c740d0674ff27122f3f48c80ce7
   subpackages:
   - balancer
   - balancer/base
@@ -127,15 +129,12 @@ imports:
   - metadata
   - naming
   - peer
-  - reflection
-  - reflection/grpc_reflection_v1alpha
   - resolver
   - resolver/dns
   - resolver/passthrough
   - stats
   - status
   - tap
-  - testdata
 testImports:
 - name: github.com/davecgh/go-spew
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d

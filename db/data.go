@@ -7,27 +7,47 @@ import (
 
 //User Info
 type User struct {
-	UserID string `db:"userid"`
-	Name   string `db:"name"`
+	UserID string `gorm:"primary_key;column:userid"`
+	Name   string `gorm:"column:name"`
+}
+
+// TableName of User
+func (User) TableName() string {
+	return "User"
 }
 
 // Product  Info
 type Product struct {
-	ProductID    string          `db:"productid"`
-	ProductName  string          `db:"product_name"`
-	ProductPrice decimal.Decimal `db:"product_price"`
+	ProductID    string          `gorm:"primary_key;column:productid"`
+	ProductName  string          `gorm:"column:product_name"`
+	ProductPrice decimal.Decimal `gorm:"column:product_price;type:decimal(20,4)"`
+}
+
+// TableName of Product
+func (Product) TableName() string {
+	return "Product"
 }
 
 // Order Info
 type Order struct {
-	OrderID      string          `db:"orderid"`
-	ProductPrice decimal.Decimal `db:"product_price"`
-	CreateTime   mysql.NullTime  `db:"create_time"`
-	ProductID    string          `db:"productid"`
+	OrderID      string         `gorm:"primary_key;column:orderid"`
+	ProductPrice float64        `gorm:"column:product_price"`
+	CreateTime   mysql.NullTime `gorm:"column:create_time"`
+	ProductID    string         `gorm:"column:productid"`
+}
+
+// TableName of Order
+func (Order) TableName() string {
+	return "Orders"
 }
 
 // Balance info
 type Balance struct {
-	UserID  string          `db:"userid"`
-	Balance decimal.Decimal `db:"balance"`
+	UserID  string  `gorm:"primary_key;column:userid"`
+	Balance float64 `gorm:"column:balance"`
+}
+
+// TableName of Balance
+func (Balance) TableName() string {
+	return "Balance"
 }

@@ -4,8 +4,10 @@ import (
 	"context"
 	"micro_framework/cmd"
 	"micro_framework/configfile"
-	"micro_framework/db/mysql"
+	//"micro_framework/db/mysql"
+	"micro_framework/db"
 
+	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
 
@@ -20,14 +22,15 @@ func init() {
 
 // InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
-	myDB, err := configfile.InitDB(config.UserService.UserDB)
+	myDB, err := gorm.Open("mysql", config.UserService.UserDB)
 	if err != nil {
 		return err
 	}
-	//orm.RunSyncdb("default", false, true)
+	myDB.AutoMigrate(&db.User{})
+	myDB.LogMode(true)
 	srv := &UserServer{
 		config:  config,
-		UserDao: &mysql.UserDao{MyDB: myDB},
+		UserDao: myDB,
 	}
 	pb.RegisterUserServer(grpcServer, srv)
 	// Register reflection service on gRPC server.
@@ -37,18 +40,16 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 
 // UserServer 自定义服务结构体
 type UserServer struct {
-	*mysql.UserDao
-	config *configfile.Config
+	config  *configfile.Config
+	UserDao *gorm.DB
 }
 
 //GetUser 校验用户
 func (s *UserServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.UserResponse, error) {
 	log := cmd.GetLog(ctx)
-	user, err := s.UserDao.GetUserByUserID(log, req.UserID)
-	if err != nil {
-		return &pb.UserResponse{Result: &pb.Result{Code: 5003, Msg: "db error"}}, err
-	}
-	if user == nil {
+	s.UserDao.SetLogger(log)
+	var user db.User
+	if err := s.UserDao.Find(&user, "userid=?", req.UserID).Error; err != nil {
 		return &pb.UserResponse{Result: &pb.Result{Code: 5001, Msg: "userid not found"}}, err
 	}
 	log.Infof("get user:%+v from db", req)
