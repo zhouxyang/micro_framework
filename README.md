@@ -4,6 +4,7 @@
 3. 优雅关闭，热重启 
 4. 使用logrus，结构化日志; 统一requestid，分布式追踪; 日志支持filename，行号
 5. 同时支持二进制以及容器化部署，支持k8s 容器编排,同时支持单集群，多集群部署方式 
+6. 采用gorm作为orm库,支持打印sql语句
 
 # micro_framework架构
 

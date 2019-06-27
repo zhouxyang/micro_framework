@@ -6,6 +6,7 @@ import (
 	"micro_framework/cmd"
 	"micro_framework/configfile"
 	"micro_framework/db"
+	"sync"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -112,12 +113,13 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 
 	productClient := product.NewProductClient(conn.GrpcConn)
 	prdChan := make(chan *db.Product, len(req.ProductID))
+	toStop := make(chan struct{})
+	wgReceivers := sync.WaitGroup{}
+	wgReceivers.Add(1)
+
 	for _, prdID := range req.ProductID {
 		go func(productID string) {
 			prd := &db.Product{}
-			defer func() {
-				prdChan <- prd
-			}()
 			productParam := &product.GetProductRequest{ProductID: productID}
 			productRes, err := productClient.GetProduct(ctx, productParam)
 			if err != nil {
@@ -136,6 +138,12 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 			}
 			prd.ProductPrice = priceDecimal
 			prd.ProductID = productRes.ProductID
+			select {
+			case prdChan <- prd:
+				return
+			case <-toStop:
+				return
+			}
 		}(prdID)
 	}
 
@@ -155,36 +163,51 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 		return &pb.OrderResponse{Result: &pb.Result{Code: 5004, Msg: "deduct error"}}, err
 	}
 	total := decimal.Zero
-	for i := 0; i < len(req.ProductID); i++ {
-		prd := <-prdChan
-		id, priceDecimal := prd.ProductID, prd.ProductPrice
-		if id == "" {
-			continue
-		}
-		deduct := &balance.DeductRequest{
-			UserID:    userID,
-			ProductID: id,
-			Price:     priceDecimal.String(),
-		}
-		if err := stream.Send(deduct); err != nil {
-			log.Infof("Failed to send a deduct: %v", err)
-			continue
-		}
+	recvCount := 0
+	go func() {
+		defer wgReceivers.Done()
+		for {
+			if recvCount == len(req.ProductID) {
+				close(toStop)
+				return
+			}
+			select {
+			case prd := <-prdChan:
+				recvCount++
+				id, priceDecimal := prd.ProductID, prd.ProductPrice
+				if id == "" {
+					continue
+				}
+				deduct := &balance.DeductRequest{
+					UserID:    userID,
+					ProductID: id,
+					Price:     priceDecimal.String(),
+				}
+				if err := stream.Send(deduct); err != nil {
+					log.Infof("Failed to send a deduct: %v", err)
+					continue
+				}
 
-		// 入库order表
-		o := db.Order{
-			ProductID:  id,
-			OrderID:    u1,
-			CreateTime: sql.NullTime{Time: time.Now(), Valid: true},
+				// 入库order表
+				o := db.Order{
+					ProductID:  id,
+					OrderID:    u1,
+					CreateTime: sql.NullTime{Time: time.Now(), Valid: true},
+				}
+				o.ProductPrice, _ = priceDecimal.Float64()
+				if err := s.OrderDao.Create(&o).Error; err != nil {
+					log.Infof("Failed to insert order: %v", err)
+					continue
+				}
+				orderResponse.OrderMsg.ProductID = append(orderResponse.OrderMsg.ProductID, id)
+				total = total.Add(priceDecimal)
+			case <-toStop:
+				return
+
+			}
 		}
-		o.ProductPrice, _ = priceDecimal.Float64()
-		if err := s.OrderDao.Create(&o).Error; err != nil {
-			log.Infof("Failed to insert order: %v", err)
-			continue
-		}
-		orderResponse.OrderMsg.ProductID = append(orderResponse.OrderMsg.ProductID, id)
-		total = total.Add(priceDecimal)
-	}
+	}()
+	wgReceivers.Wait()
 	reply, err := stream.CloseAndRecv()
 	if err != nil {
 		log.Infof("stream.CloseAndRecv error", err)
