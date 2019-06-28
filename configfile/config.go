@@ -7,15 +7,16 @@ import (
 
 // Config 全局配置文件
 type Config struct {
-	Host       string
-	Port       int
-	ServerName string
-	ServerID   int
-	LogPath    string
-	EtcdHost   string
-	EtcdPort   int
+	Host                   string
+	Port                   int
+	ServerName             string
+	ServerID               int
+	LogPath                string
+	EtcdHost               string
+	EtcdPort               int
+	ZipkinHTTPEndpoint     string
+	ZipkinRecorderHostPort string
 
-	JSONDBFile   string
 	OrderService struct {
 		OrderDB        string
 		UserService    string

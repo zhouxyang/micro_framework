@@ -3,12 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"micro_framework/cmd"
+	"micro_framework/configfile"
 	"net"
 	"os"
 	"os/exec"
 	"os/signal"
-	"micro_framework/cmd"
-	"micro_framework/configfile"
 	"syscall"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -21,6 +21,9 @@ import (
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
+	"github.com/opentracing/opentracing-go"
+	zipkin "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	grpc_requestid "micro_framework/middleware/grpc_requestid"
 
 	_ "micro_framework/cmd/balance"
@@ -127,7 +130,7 @@ func registerEtcd(log *logrus.Entry, conf *configfile.Config) error {
 	// 将本服务注册添加etcd
 	err = r.Update(context.TODO(), conf.ServerName, naming.Update{Op: naming.Add, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
 	if err != nil {
-		log.Infof("[测] update etcd err:", err)
+		log.Infof("[测] update etcd err:%v", err)
 		return err
 	}
 	return nil
@@ -145,7 +148,7 @@ func unRegisterEtcd(log *logrus.Entry, conf *configfile.Config) error {
 	// 将本服务注册添加etcd中
 	err = r.Update(context.TODO(), conf.ServerName, naming.Update{Op: naming.Delete, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
 	if err != nil {
-		log.Infof("update etcd err:", err)
+		log.Infof("update etcd err:%v", err)
 		return err
 	}
 	return nil
@@ -153,17 +156,30 @@ func unRegisterEtcd(log *logrus.Entry, conf *configfile.Config) error {
 }
 
 func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
+	collector, err := zipkin.NewHTTPCollector(conf.ZipkinHTTPEndpoint)
+	if err != nil {
+		log.Fatalf("zipkin.NewHTTPCollector err: %v", err)
+	}
+
+	recorder := zipkin.NewRecorder(collector, true, conf.ZipkinRecorderHostPort, "micro_framework")
+	tracer, err := zipkin.NewTracer(recorder, zipkin.ClientServerSameSpan(true))
+	if err != nil {
+		log.Fatalf("zipkin.NewTracer err: %v", err)
+	}
+	opentracing.InitGlobalTracer(tracer)
 	// 配置gprc中间件
 	grpcServer := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_logrus.StreamServerInterceptor(log),
 			grpc_requestid.StreamServerInterceptor(log),
 			grpc_recovery.StreamServerInterceptor(),
+			grpc_opentracing.StreamServerInterceptor(),
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_logrus.UnaryServerInterceptor(log),
 			grpc_requestid.UnaryServerInterceptor(log),
 			grpc_recovery.UnaryServerInterceptor(),
+			grpc_opentracing.UnaryServerInterceptor(),
 		)),
 	)
 

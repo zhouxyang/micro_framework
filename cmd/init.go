@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"os"
 	"micro_framework/configfile"
 	"micro_framework/pkg/caller"
+	"os"
 	"time"
 
 	"github.com/coreos/etcd/clientv3"
@@ -17,6 +17,7 @@ import (
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	//grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	grpc_requestid "micro_framework/middleware/grpc_requestid"
 )
@@ -79,6 +80,7 @@ func GetGrpcConnByEtcd(ctx context.Context, service string, cli *clientv3.Client
 				grpc_logrus.UnaryClientInterceptor(log),
 				//grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
 				grpc_requestid.UnaryClientInterceptor(log),
+				grpc_opentracing.UnaryClientInterceptor(),
 			),
 		),
 		grpc.WithStreamInterceptor(
@@ -86,6 +88,7 @@ func GetGrpcConnByEtcd(ctx context.Context, service string, cli *clientv3.Client
 				grpc_logrus.StreamClientInterceptor(log),
 				//grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
 				grpc_requestid.StreamClientInterceptor(log),
+				grpc_opentracing.StreamClientInterceptor(),
 			),
 		),
 	)
@@ -115,6 +118,7 @@ func GetGrpcConnByDomain(ctx context.Context, service string, log *logrus.Entry)
 				grpc_logrus.UnaryClientInterceptor(log),
 				//grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
 				grpc_requestid.UnaryClientInterceptor(log),
+				grpc_opentracing.UnaryClientInterceptor(),
 			),
 		),
 		grpc.WithStreamInterceptor(
@@ -122,6 +126,7 @@ func GetGrpcConnByDomain(ctx context.Context, service string, log *logrus.Entry)
 				grpc_logrus.StreamClientInterceptor(log),
 				//grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
 				grpc_requestid.StreamClientInterceptor(log),
+				grpc_opentracing.StreamClientInterceptor(),
 			),
 		),
 	)

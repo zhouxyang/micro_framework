@@ -2,9 +2,10 @@
 1. 使用etcd服务发现，etcd采用短连接
 2. 服务的创建采用注册方式，减少业务代码与框架的耦合
 3. 优雅关闭，热重启 
-4. 使用logrus，结构化日志; 统一requestid，分布式追踪; 日志支持filename，行号
+4. 使用logrus，结构化日志; 用同一个requestid串联不同微服务的请求; 日志支持filename，行号
 5. 同时支持二进制以及容器化部署，支持k8s 容器编排,同时支持单集群，多集群部署方式 
 6. 采用gorm作为orm库,支持打印sql语句
+7. 支持opentracing分布式分布式追踪
 
 # micro_framework架构
 
