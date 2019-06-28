@@ -18,9 +18,11 @@ func (User) TableName() string {
 
 // Product  Info
 type Product struct {
-	ProductID    string          `gorm:"primary_key;column:productid"`
-	ProductName  string          `gorm:"column:product_name"`
-	ProductPrice decimal.Decimal `gorm:"column:product_price;type:decimal(20,4)"`
+	ProductID    string  `gorm:"primary_key;column:productid"`
+	ProductName  string  `gorm:"column:product_name"`
+	ProductPrice float64 `gorm:"column:product_price;type:decimal(20,4)"`
+
+	ProductPriceDecimal decimal.Decimal `gorm:"-"`
 }
 
 // TableName of Product

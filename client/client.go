@@ -74,7 +74,6 @@ func main() {
 	defer conn.Close()
 	client := order.NewOrderClient(conn)
 
-	// Looking for a valid feature
 	createReq := &order.OrderCreateRequest{
 		UserID:    "123",
 		ProductID: []string{"1", "2", "3"},

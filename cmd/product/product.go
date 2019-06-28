@@ -2,6 +2,7 @@ package product
 
 import (
 	"context"
+	"fmt"
 	"micro_framework/cmd"
 	"micro_framework/configfile"
 	"micro_framework/db"
@@ -55,7 +56,7 @@ func (s *ProductServer) GetProduct(ctx context.Context, req *pb.GetProductReques
 	return &pb.ProductResponse{
 		ProductID:    product.ProductID,
 		ProductName:  product.ProductName,
-		ProductPrice: product.ProductPrice.String(),
+		ProductPrice: fmt.Sprintf("%v", product.ProductPrice),
 		Result:       &pb.Result{Code: 1000, Msg: "ok"},
 	}, nil
 }

@@ -136,7 +136,7 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 				log.Infof("decimal.NewFromString error:%v", err)
 				return
 			}
-			prd.ProductPrice = priceDecimal
+			prd.ProductPriceDecimal = priceDecimal
 			prd.ProductID = productRes.ProductID
 			select {
 			case prdChan <- prd:
@@ -174,7 +174,7 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 			select {
 			case prd := <-prdChan:
 				recvCount++
-				id, priceDecimal := prd.ProductID, prd.ProductPrice
+				id, priceDecimal := prd.ProductID, prd.ProductPriceDecimal
 				if id == "" {
 					continue
 				}
@@ -210,7 +210,7 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 	wgReceivers.Wait()
 	reply, err := stream.CloseAndRecv()
 	if err != nil {
-		log.Infof("stream.CloseAndRecv error", err)
+		log.Infof("stream.CloseAndRecv error:%v", err)
 		return &pb.OrderResponse{Result: &pb.Result{Code: 5004, Msg: "deduct error"}}, err
 	}
 	if reply.Result.Code != 1000 {
