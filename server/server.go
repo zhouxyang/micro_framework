@@ -161,7 +161,7 @@ func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
 		log.Fatalf("zipkin.NewHTTPCollector err: %v", err)
 	}
 
-	recorder := zipkin.NewRecorder(collector, true, conf.ZipkinRecorderHostPort, "micro_framework")
+	recorder := zipkin.NewRecorder(collector, true, fmt.Sprintf("%v:%v", conf.Host, conf.Port), "micro_framework")
 	tracer, err := zipkin.NewTracer(recorder, zipkin.ClientServerSameSpan(true))
 	if err != nil {
 		log.Fatalf("zipkin.NewTracer err: %v", err)
