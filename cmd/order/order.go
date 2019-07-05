@@ -33,7 +33,7 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 	if err != nil {
 		return err
 	}
-	myDB.AutoMigrate(&db.Product{})
+	myDB.AutoMigrate(&db.Order{})
 	myDB.LogMode(true)
 	srv := &OrderServer{
 		config:   config,

@@ -9,6 +9,7 @@ EtcdHost="etcd-cluster-client"
 #EtcdHost="127.0.0.1"
 EtcdPort=2379
 #Zipkin  docker run -d -p 9411:9411 -p 9410:9410 openzipkin/zipkin
+# http://127.0.0.1:9411/zipkin/
 ZipkinHTTPEndpoint="http://10.249.155.239:9411/api/v1/spans"	
 
 

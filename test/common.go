@@ -10,6 +10,8 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+//go test -v -count=1  test/*
+
 var (
 	ServerAddr = flag.String("server_addr", "micro-framework.mydomain.com:443", "The server address in the format of host:port")
 	Crt        = flag.String("crt", "../script/ingress/server.crt", "file path of server.crt")

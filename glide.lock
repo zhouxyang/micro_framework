@@ -1,8 +1,8 @@
 hash: 1eb23e92ec0b22e978a7f27322f9b8e61cfc39639ca2f26adb22ae4c5395975f
-updated: 2019-06-28T16:17:23.47808+08:00
+updated: 2019-07-05T11:06:04.268164+08:00
 imports:
 - name: github.com/apache/thrift
-  version: bd1a273ab7979824952bab906b8e260f81b2bd15
+  version: 1a2dee60b4384de2f6190caa85cf3e2a497c31b9
   subpackages:
   - lib/go/thrift
 - name: github.com/BurntSushi/toml
@@ -78,7 +78,7 @@ imports:
   - encoding/asn1
   - x/crypto/pbkdf2
 - name: github.com/jinzhu/gorm
-  version: a6b790ffd00da9beddc60a0d2d5b9e31f03a3ffd
+  version: 836fb2c19d84dac7b0272958dfb9af7cf0d0ade4
 - name: github.com/jinzhu/inflection
   version: f5c5f50e6090ae76a29240b61ae2a90dd810112e
 - name: github.com/kr/logfmt
@@ -86,7 +86,7 @@ imports:
 - name: github.com/opentracing-contrib/go-observer
   version: a52f2342449246d5bcc273e65cbdcfa5f7d6c63c
 - name: github.com/opentracing/opentracing-go
-  version: 659c90643e714681897ec2521c60567dd21da733
+  version: 135aa78c6f95b4a199daf2f0470d231136cbbd0c
   subpackages:
   - ext
   - log
@@ -98,17 +98,8 @@ imports:
   - thrift/gen-go/zipkincore
   - types
   - wire
-- name: github.com/openzipkin/zipkin-go
-  version: 55065cdaa9e9c0e50c02038d5206f9cf0c1d4779
-  subpackages:
-  - idgenerator
-  - middleware/grpc
-  - model
-  - propagation
-  - propagation/b3
-  - reporter
 - name: github.com/pierrec/lz4
-  version: 11125646385201cd6d88f79505bff50b6eb5abaa
+  version: 057d66e894a4e55853274a3bbbf7de02ba639e43
   subpackages:
   - internal/xxh32
 - name: github.com/pkg/errors
@@ -118,7 +109,7 @@ imports:
 - name: github.com/satori/go.uuid
   version: b061729afc07e77a8aa4fad0a2fd840958f1942a
 - name: github.com/Shopify/sarama
-  version: 93e48db37537df7988c205c840bba0ea2b3ff7d9
+  version: dde3ddda8b4b3a594690086725799ab1573bb895
 - name: github.com/shopspring/decimal
   version: d6f52241f332c63811249bd79a522406bea1a7c9
 - name: github.com/sirupsen/logrus
@@ -159,11 +150,11 @@ imports:
   - unicode/bidi
   - unicode/norm
 - name: google.golang.org/genproto
-  version: 09f6ed296fc66555a25fe4ce95173148778dfa85
+  version: 694d95ba50e67b2e363f3483057db5d4910c18f9
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 501c41df7f472c740d0674ff27122f3f48c80ce7
+  version: 1d89a3c832915b2314551c1d2a506874d62e53f7
   subpackages:
   - balancer
   - balancer/base
@@ -194,6 +185,7 @@ imports:
   - resolver
   - resolver/dns
   - resolver/passthrough
+  - serviceconfig
   - stats
   - status
   - tap
