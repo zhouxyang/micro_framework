@@ -22,6 +22,7 @@ function destory_ingress(){
     kubectl delete -f script/ingress/mandatory.yaml
     kubectl delete -f script/ingress/cloud-generic.yaml
     kubectl delete -f script/ingress/ingress.yaml
+	kubectl delete secret tls-secret -n ingress-nginx
 }
 
 function destory_mysql(){

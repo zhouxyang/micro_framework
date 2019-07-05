@@ -1,4 +1,4 @@
-package grpcrequestid
+package requestdump
 
 import (
 	"context"
@@ -12,7 +12,7 @@ import (
 )
 
 // UnaryServerInterceptor 从客户端拿到matadata中的requestid
-func UnaryServerInterceptor(entry *logrus.Entry) grpc.UnaryServerInterceptor {
+func UnaryServerInterceptor() grpc.UnaryServerInterceptor {
 	return func(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 		log := ctxlogrus.Extract(ctx)
 		u1 := ""
@@ -38,7 +38,7 @@ func UnaryServerInterceptor(entry *logrus.Entry) grpc.UnaryServerInterceptor {
 }
 
 // StreamServerInterceptor 从客户端拿到matadata中的requestid
-func StreamServerInterceptor(entry *logrus.Entry) grpc.StreamServerInterceptor {
+func StreamServerInterceptor() grpc.StreamServerInterceptor {
 	return func(srv interface{}, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) (err error) {
 		ctx := stream.Context()
 		log := ctxlogrus.Extract(ctx)
@@ -49,7 +49,6 @@ func StreamServerInterceptor(entry *logrus.Entry) grpc.StreamServerInterceptor {
 			log.Infof("ServerStreamingEcho: failed to get metadata")
 		}
 		if t, ok := md["requestid"]; ok {
-			//log.Infof("request from metadata: %v", t)
 			for _, e := range t {
 				u1 = e
 			}

@@ -25,6 +25,7 @@ import (
 	"github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin-contrib/zipkin-go-opentracing"
 	grpc_requestid "micro_framework/middleware/grpc_requestid"
+	requestdump "micro_framework/middleware/requestdump"
 
 	_ "micro_framework/cmd/balance"
 	_ "micro_framework/cmd/order"
@@ -171,15 +172,16 @@ func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
 	grpcServer := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
 			grpc_logrus.StreamServerInterceptor(log),
-			grpc_requestid.StreamServerInterceptor(log),
+			grpc_requestid.StreamServerInterceptor(),
 			grpc_recovery.StreamServerInterceptor(),
 			grpc_opentracing.StreamServerInterceptor(),
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_logrus.UnaryServerInterceptor(log),
-			grpc_requestid.UnaryServerInterceptor(log),
+			grpc_requestid.UnaryServerInterceptor(),
 			grpc_recovery.UnaryServerInterceptor(),
 			grpc_opentracing.UnaryServerInterceptor(),
+			requestdump.UnaryServerInterceptor(),
 		)),
 	)
 
