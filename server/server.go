@@ -21,10 +21,10 @@ import (
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
+	"github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin-contrib/zipkin-go-opentracing"
-	grpc_requestid "micro_framework/middleware/grpc_requestid"
 	requestdump "micro_framework/middleware/requestdump"
 
 	_ "micro_framework/cmd/balance"
@@ -168,17 +168,20 @@ func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
 		log.Fatalf("zipkin.NewTracer err: %v", err)
 	}
 	opentracing.InitGlobalTracer(tracer)
+	/*opts := []grpc_ctxtags.Option{
+		grpc_ctxtags.WithFieldExtractorForInitialReq(grpc_ctxtags.TagBasedRequestFieldExtractor("requestid")),
+	}*/
 	// 配置gprc中间件
 	grpcServer := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			grpc_ctxtags.StreamServerInterceptor(),
 			grpc_logrus.StreamServerInterceptor(log),
-			grpc_requestid.StreamServerInterceptor(),
 			grpc_recovery.StreamServerInterceptor(),
 			grpc_opentracing.StreamServerInterceptor(),
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_logrus.UnaryServerInterceptor(log),
-			grpc_requestid.UnaryServerInterceptor(),
 			grpc_recovery.UnaryServerInterceptor(),
 			grpc_opentracing.UnaryServerInterceptor(),
 			requestdump.UnaryServerInterceptor(),

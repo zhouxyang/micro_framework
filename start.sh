@@ -13,8 +13,8 @@ function init_mysql(){
 }
 
 function init_etcd(){
-    kubectl create -f script/etcd/etcd-cluster.yaml
     kubectl create -f script/etcd/etcd-deployment.yaml 
+    kubectl create -f script/etcd/etcd-cluster.yaml
     kubectl create -f script/etcd/etcd-client-service-lb.yaml
 }
 

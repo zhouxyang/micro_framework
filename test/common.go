@@ -2,10 +2,14 @@ package test
 
 import (
 	"flag"
+	"os"
 
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/jinzhu/gorm"
 	"github.com/pkg/errors"
 	"github.com/satori/go.uuid"
+	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -37,13 +41,25 @@ func initDB() (*gorm.DB, error) {
 
 func getConn() (*grpc.ClientConn, error) {
 	flag.Parse()
-	var opts []grpc.DialOption
 	creds, err := credentials.NewClientTLSFromFile(*Crt, "")
 	if err != nil {
 		return nil, errors.Errorf("fail to new: %v", err)
 	}
-	opts = append(opts, grpc.WithTransportCredentials(creds))
-	conn, gerr := grpc.Dial(*ServerAddr, opts...)
+	entry := logrus.New()
+	entry.Formatter = &logrus.JSONFormatter{}
+	entry.Out = os.Stdout
+
+	log := entry.WithFields(logrus.Fields{
+		"pid": os.Getpid(),
+	})
+	conn, gerr := grpc.Dial(*ServerAddr,
+		grpc.WithTransportCredentials(creds),
+		grpc.WithUnaryInterceptor(
+			grpc_middleware.ChainUnaryClient(
+				grpc_logrus.UnaryClientInterceptor(log),
+			),
+		),
+	)
 	if gerr != nil {
 		return nil, errors.Errorf("fail to dial: %v", gerr)
 	}
