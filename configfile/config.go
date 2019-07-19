@@ -15,6 +15,7 @@ type Config struct {
 	EtcdHost           string
 	EtcdPort           int
 	ZipkinHTTPEndpoint string
+	ConcurrencyLimit   int64
 
 	OrderService struct {
 		OrderDB        string

@@ -10,6 +10,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"github.com/sirupsen/logrus"
@@ -25,6 +26,8 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin-contrib/zipkin-go-opentracing"
+	"github.com/rcrowley/go-metrics"
+	ratelimit "micro_framework/middleware/ratelimit"
 	requestdump "micro_framework/middleware/requestdump"
 
 	_ "micro_framework/cmd/balance"
@@ -34,6 +37,10 @@ import (
 )
 
 var version string
+var (
+	qpsRate     = metrics.NewRegisteredMeter("qps", nil)
+	concurrency = metrics.NewRegisteredCounter("concurrency", nil)
+)
 
 func main() {
 	flag.Parse()
@@ -97,7 +104,7 @@ func start(filename string, reload bool) error {
 	if err != nil {
 		return err
 	}
-	//log.Infof("%+v", *conf)
+	go metrics.Log(metrics.DefaultRegistry, 5*time.Second, log)
 	var lis net.Listener
 	if reload {
 		f := os.NewFile(3, "")
@@ -157,6 +164,8 @@ func unRegisterEtcd(log *logrus.Entry, conf *configfile.Config) error {
 }
 
 func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
+	limit := &ratelimit.Limiter{Counter: concurrency, Meter: qpsRate, Limit: conf.ConcurrencyLimit}
+	// 配置zipkin地址
 	collector, err := zipkin.NewHTTPCollector(conf.ZipkinHTTPEndpoint)
 	if err != nil {
 		log.Fatalf("zipkin.NewHTTPCollector err: %v", err)
@@ -168,18 +177,24 @@ func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
 		log.Fatalf("zipkin.NewTracer err: %v", err)
 	}
 	opentracing.InitGlobalTracer(tracer)
-	/*opts := []grpc_ctxtags.Option{
-		grpc_ctxtags.WithFieldExtractorForInitialReq(grpc_ctxtags.TagBasedRequestFieldExtractor("requestid")),
-	}*/
 	// 配置gprc中间件
+	/*
+		tags中间件生成新的grpc_ctxtags,并放进ctx
+		logrus中间件把entry放进ctx,并且在Extract把grpc_ctxtags存放的k/v都写进field
+		opentracing把span放进ctx，并记录span
+		requestdump打印请求响应内容
+		ratelimit控制并发并统计qps
+	*/
 	grpcServer := grpc.NewServer(
 		grpc.StreamInterceptor(grpc_middleware.ChainStreamServer(
+			ratelimit.StreamServerInterceptor(limit),
 			grpc_ctxtags.StreamServerInterceptor(),
 			grpc_logrus.StreamServerInterceptor(log),
 			grpc_recovery.StreamServerInterceptor(),
 			grpc_opentracing.StreamServerInterceptor(),
 		)),
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
+			ratelimit.UnaryServerInterceptor(limit),
 			grpc_ctxtags.UnaryServerInterceptor(),
 			grpc_logrus.UnaryServerInterceptor(log),
 			grpc_recovery.UnaryServerInterceptor(),

@@ -79,7 +79,7 @@ func GetGrpcConnByEtcd(ctx context.Context, service string, cli *clientv3.Client
 			grpc_middleware.ChainUnaryClient(
 				grpc_logrus.UnaryClientInterceptor(log),
 				//grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
-				grpc_requestid.UnaryClientInterceptor(log),
+				//grpc_requestid.UnaryClientInterceptor(log),
 				grpc_opentracing.UnaryClientInterceptor(),
 			),
 		),
@@ -87,7 +87,7 @@ func GetGrpcConnByEtcd(ctx context.Context, service string, cli *clientv3.Client
 			grpc_middleware.ChainStreamClient(
 				grpc_logrus.StreamClientInterceptor(log),
 				//grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
-				grpc_requestid.StreamClientInterceptor(log),
+				//grpc_requestid.StreamClientInterceptor(log),
 				grpc_opentracing.StreamClientInterceptor(),
 			),
 		),

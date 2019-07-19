@@ -120,6 +120,9 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 	for _, prdID := range req.ProductID {
 		go func(productID string) {
 			prd := &db.Product{}
+			defer func() {
+				prdChan <- prd
+			}()
 			productParam := &product.GetProductRequest{ProductID: productID}
 			productRes, err := productClient.GetProduct(ctx, productParam)
 			if err != nil {
@@ -138,12 +141,6 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 			}
 			prd.ProductPriceDecimal = priceDecimal
 			prd.ProductID = productRes.ProductID
-			select {
-			case prdChan <- prd:
-				return
-			case <-toStop:
-				return
-			}
 		}(prdID)
 	}
 
