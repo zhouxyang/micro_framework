@@ -17,7 +17,7 @@ spec:
                       preStop:
                         exec:
                           command: ["/bin/sh", "-c", "sh script/pre_stop.sh"]
-                  image: micro-framework
+                  image: micro-framework:latest
                   imagePullPolicy: Never
                   command: [ "/bin/sh", "-c", "sh  script/start.sh" ]
                   ports:
