@@ -1,6 +1,8 @@
 package configfile
 
 import (
+	"os"
+
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
 )
@@ -40,6 +42,10 @@ func GetConfig(filename string) (*Config, error) {
 	if _, err := toml.DecodeFile(filename, conf); err != nil {
 		werr := errors.Wrap(err, "ParseConfig error")
 		return nil, werr
+	}
+	host := os.Getenv("MY_POD_IP")
+	if host != "" {
+		conf.Host = host
 	}
 	return conf, nil
 

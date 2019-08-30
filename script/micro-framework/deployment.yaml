@@ -12,7 +12,7 @@ spec:
                 app: micro-framework  # 为所有 Pod 都打上这个标签
         spec:
             containers:
-                - name: micro
+                - name: micro-framework
                   lifecycle:
                       preStop:
                         exec:
