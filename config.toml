@@ -12,7 +12,7 @@ EtcdPort=2379
 # http://127.0.0.1:9411/zipkin/
 ZipkinHTTPEndpoint="http://10.249.155.239:9411/api/v1/spans"	
 # ConcurrencyLimit服务限流 
-ConcurrencyLimit=3
+ConcurrencyLimit=10
 
 # 日志路径映射到tail -f /tmp/log/micro_framework.log
 LogPath="/tmp/micro_framework.log"
