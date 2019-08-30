@@ -5,7 +5,7 @@ metadata:
     labels:
         app: micro-framework  # 为所有 Pod 都打上这个标签
 spec:
-    replicas: 1
+    replicas: 2
     template:
         metadata:
             labels:
@@ -17,8 +17,8 @@ spec:
                       preStop:
                         exec:
                           command: ["/bin/sh", "-c", "sh script/pre_stop.sh"]
-                  image: micro-framework:latest
-                  imagePullPolicy: Never
+                  image: gongfupanda2/micro-framework:latest
+                  #imagePullPolicy: Never
                   command: [ "/bin/sh", "-c", "sh  script/start.sh" ]
                   ports:
                     - containerPort: 10000
@@ -33,6 +33,8 @@ spec:
                       valueFrom:
                         fieldRef:
                           fieldPath: status.podIP
+            imagePullSecrets:
+                - name: regcred
 
             volumes:
                 - name: config-volume
