@@ -3,7 +3,6 @@
 function init_ingress(){
     kubectl create -f script/ingress/mandatory.yaml
     kubectl create -f script/ingress/cloud-generic.yaml
-    kubectl create -f script/ingress/ingress.yaml
     kubectl create secret tls tls-secret --key script/ingress/server.key --cert script/ingress/server.crt  -n ingress-nginx
 }
 
@@ -13,16 +12,15 @@ function init_mysql(){
 }
 
 function init_etcd(){
+	kubectl create -f script/etcd/hazelcast-rbac.yaml
     kubectl create -f script/etcd/etcd-deployment.yaml 
     kubectl create -f script/etcd/etcd-client-service-lb.yaml
     kubectl create -f script/etcd/etcd-cluster.yaml
-	kubectl create -f script/etcd/hazelcast-rbac.yaml
 }
 
 function destory_ingress(){
     kubectl delete -f script/ingress/mandatory.yaml
     kubectl delete -f script/ingress/cloud-generic.yaml
-    kubectl delete -f script/ingress/ingress.yaml
     kubectl delete secret tls-secret -n ingress-nginx
 }
 
@@ -41,14 +39,12 @@ function destory_etcd(){
 function start(){
     kubectl create configmap micro-config --from-file=config.toml
     kubectl create secret docker-registry regcred --docker-server=https://index.docker.io/v1/ --docker-username=gongfupanda2 --docker-password=090405docker --docker-email=15623492306@163.com
-    kubectl create -f script/micro-framework/deployment.yaml
-    kubectl create -f script/micro-framework/service.yaml
+	helm install script/mychart --name mychart-micro-framework 
 }
 function stop(){
     kubectl delete configmap micro-config
     kubectl delete secret regcred
-	kubectl delete -f script/micro-framework/deployment.yaml
-    kubectl delete -f script/micro-framework/service.yaml
+	helm delete --purge mychart-micro-framework
 }
 
 function help() {
