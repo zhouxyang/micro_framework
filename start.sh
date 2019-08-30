@@ -40,12 +40,14 @@ function destory_etcd(){
 
 function start(){
     kubectl create configmap micro-config --from-file=config.toml
+    kubectl create secret docker-registry regcred --docker-server=https://index.docker.io/v1/ --docker-username=gongfupanda2 --docker-password=090405docker --docker-email=15623492306@163.com
     kubectl create -f script/micro-framework/deployment.yaml
     kubectl create -f script/micro-framework/service.yaml
 }
 function stop(){
     kubectl delete configmap micro-config
-    kubectl delete -f script/micro-framework/deployment.yaml
+    kubectl delete secret regcred
+	kubectl delete -f script/micro-framework/deployment.yaml
     kubectl delete -f script/micro-framework/service.yaml
 }
 
