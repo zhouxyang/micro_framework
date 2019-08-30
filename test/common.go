@@ -19,7 +19,7 @@ import (
 var (
 	ServerAddr = flag.String("server_addr", "micro-framework.mydomain.com:443", "The server address in the format of host:port")
 	Crt        = flag.String("crt", "../script/ingress/server.crt", "file path of server.crt")
-	Database   = flag.String("database", "root:test@tcp(localhost:32306)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s", "db config")
+	Database   = flag.String("database", "root:test@tcp(192.168.87.129:32306)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s", "db config")
 )
 
 //UserID create new userID
