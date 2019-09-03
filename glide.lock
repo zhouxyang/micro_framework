@@ -1,36 +1,45 @@
-hash: 1eb23e92ec0b22e978a7f27322f9b8e61cfc39639ca2f26adb22ae4c5395975f
-updated: 2019-07-05T11:06:04.268164+08:00
+hash: 090bdff92f373cceb124ac41b730a53a0456fd834242a32f3aa4e537f31f4560
+updated: 2019-09-02T19:18:14.397386+08:00
 imports:
 - name: github.com/apache/thrift
-  version: 1a2dee60b4384de2f6190caa85cf3e2a497c31b9
+  version: a715f701bf4850b41b7f3fa016d16a9153319e1e
   subpackages:
   - lib/go/thrift
 - name: github.com/BurntSushi/toml
   version: 99064174e013895bbd9b025c31100bd1d9b590ca
 - name: github.com/coreos/etcd
-  version: 98d308426819d892e149fe45f6fd542464cb1f9d
+  version: 898bd1351fcf6e0ebce8d7c8bbbbf3f3e42aa42c
   subpackages:
-  - auth/authpb
   - clientv3
   - clientv3/naming
-  - etcdserver/api/v3rpc/rpctypes
-  - etcdserver/etcdserverpb
-  - mvcc/mvccpb
-  - pkg/types
+- name: github.com/coreos/go-systemd
+  version: fd7a80b32e1fc73e890fde45604ed5009dc817a3
+  subpackages:
+  - journal
+- name: github.com/coreos/pkg
+  version: 399ea9e2e55f791b6e3d920860dbecb99c3692f0
+  subpackages:
+  - capnslog
 - name: github.com/DataDog/zstd
-  version: 809b919c325d7887bff7bd876162af73db53e878
+  version: 2347a397da4ee9c6b8226d4aff82c302d0e52773
 - name: github.com/davecgh/go-spew
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
   - spew
 - name: github.com/eapache/go-resiliency
-  version: 5efd2ed019fd331ec2defc6f3bd98882f1e3e636
+  version: b98ce2825f7276cc41027348986a241ef5d62fd8
   subpackages:
   - breaker
 - name: github.com/eapache/go-xerial-snappy
   version: 776d5712da21bc4762676d614db1d8a64f4238b0
 - name: github.com/eapache/queue
   version: 093482f3f8ce946c05bcba64badd2c82369e084d
+- name: github.com/evalphobia/logrus_fluent
+  version: 621d68bf8fabde59e8e1b7e612e82a4f1fc56301
+- name: github.com/fluent/fluent-logger-golang
+  version: cca4fbf5ca88be2681a15bef44f65864c54ae7ee
+  subpackages:
+  - fluent
 - name: github.com/go-logfmt/logfmt
   version: 07c9b44f60d7ffdfb7d8efe1ad539965737836dc
 - name: github.com/go-sql-driver/mysql
@@ -46,7 +55,7 @@ imports:
   subpackages:
   - gomock
 - name: github.com/golang/protobuf
-  version: b5d812f8a3706043e23a9cd5babf2e5423744d30
+  version: 6c65a5562fc06764971b7c5d05c76c75e84bdbf7
   subpackages:
   - jsonpb
   - proto
@@ -57,8 +66,10 @@ imports:
   - ptypes/timestamp
 - name: github.com/golang/snappy
   version: 2a8bb927dd31d8daada140a5d09578521ce5c36a
+- name: github.com/google/uuid
+  version: c2e93f3ae59f2904160ceaab466009f965df46d6
 - name: github.com/grpc-ecosystem/go-grpc-middleware
-  version: 27f3801344b24dd6e9c608692368947f674a8298
+  version: 7b2a5baba669586cf5c78192e8036a42b2e42a5e
   subpackages:
   - logging
   - logging/logrus
@@ -78,7 +89,7 @@ imports:
   - encoding/asn1
   - x/crypto/pbkdf2
 - name: github.com/jinzhu/gorm
-  version: 836fb2c19d84dac7b0272958dfb9af7cf0d0ade4
+  version: 2a3ab99a081dc14b29dfd4df42d4c59ba1814d21
 - name: github.com/jinzhu/inflection
   version: f5c5f50e6090ae76a29240b61ae2a90dd810112e
 - name: github.com/kr/logfmt
@@ -86,7 +97,7 @@ imports:
 - name: github.com/opentracing-contrib/go-observer
   version: a52f2342449246d5bcc273e65cbdcfa5f7d6c63c
 - name: github.com/opentracing/opentracing-go
-  version: 135aa78c6f95b4a199daf2f0470d231136cbbd0c
+  version: 659c90643e714681897ec2521c60567dd21da733
   subpackages:
   - ext
   - log
@@ -98,8 +109,10 @@ imports:
   - thrift/gen-go/zipkincore
   - types
   - wire
+- name: github.com/philhofer/fwd
+  version: bb6d471dc95d4fe11e432687f8b70ff496cf3136
 - name: github.com/pierrec/lz4
-  version: 057d66e894a4e55853274a3bbbf7de02ba639e43
+  version: 21241797f8cd81af1b8dde3323c6f805799d053e
   subpackages:
   - internal/xxh32
 - name: github.com/pkg/errors
@@ -109,7 +122,7 @@ imports:
 - name: github.com/satori/go.uuid
   version: b061729afc07e77a8aa4fad0a2fd840958f1942a
 - name: github.com/Shopify/sarama
-  version: dde3ddda8b4b3a594690086725799ab1573bb895
+  version: ed36e5f0a6e9b7a10233e51b67f4a4d435b3bcca
 - name: github.com/shopspring/decimal
   version: d6f52241f332c63811249bd79a522406bea1a7c9
 - name: github.com/sirupsen/logrus
@@ -118,11 +131,46 @@ imports:
   version: 9495bc009a56819bdb0ddbc1a373e29c140bc674
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+- name: github.com/tinylib/msgp
+  version: efe20429c9b7b2a358aba9ba2d40ad56d966ce00
+  subpackages:
+  - msgp
+- name: go.etcd.io/etcd
+  version: 14624b7d642d357eac5f1cbe46271e790d68177b
+  subpackages:
+  - auth/authpb
+  - clientv3
+  - clientv3/balancer
+  - clientv3/balancer/connectivity
+  - clientv3/balancer/picker
+  - clientv3/balancer/resolver/endpoint
+  - clientv3/credentials
+  - etcdserver/api/v3rpc/rpctypes
+  - etcdserver/etcdserverpb
+  - mvcc/mvccpb
+  - pkg/logutil
+  - pkg/systemd
+  - pkg/types
+  - raft
+  - raft/confchange
+  - raft/quorum
+  - raft/raftpb
+  - raft/tracker
+- name: go.uber.org/atomic
+  version: df976f2515e274675050de7b3f42545de80594fd
+- name: go.uber.org/multierr
+  version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
+- name: go.uber.org/zap
+  version: 35aad584952c3e7020db7b839f6b102de6271f89
+  subpackages:
+  - buffer
+  - internal/bufferpool
+  - internal/color
+  - internal/exit
+  - zapcore
 - name: golang.org/x/crypto
   version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:
-  - bcrypt
-  - blowfish
   - md4
   - pbkdf2
   - ssh/terminal
@@ -154,7 +202,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 1d89a3c832915b2314551c1d2a506874d62e53f7
+  version: 6eaf6f47437a6b4e2153a190160ef39a92c7eceb
   subpackages:
   - balancer
   - balancer/base
@@ -167,7 +215,6 @@ imports:
   - encoding
   - encoding/proto
   - grpclog
-  - health/grpc_health_v1
   - internal
   - internal/backoff
   - internal/balancerload
@@ -237,6 +284,8 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 34c6fa2dc70986bccbbffcc6130f6920a924b075
+  version: 221dbe5ed46703ee255b1da0dec05086f5035f62
   subpackages:
   - assert
+- name: gopkg.in/yaml.v2
+  version: 51d6538a90f86fe93ac480b35f37b2be17fef232

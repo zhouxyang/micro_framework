@@ -8,10 +8,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/coreos/etcd/clientv3"
+	//"github.com/coreos/etcd/clientv3"
+	"github.com/evalphobia/logrus_fluent"
 	"github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus/ctxlogrus"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"go.etcd.io/etcd/clientv3"
 	"google.golang.org/grpc"
 
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
@@ -22,15 +24,16 @@ import (
 	grpc_requestid "micro_framework/middleware/grpc_requestid"
 )
 
-func InitGrpcLog(filename string) (*logrus.Entry, error) {
+func InitGrpcLog(conf *configfile.Config) (*logrus.Entry, error) {
 	// init grpc log
-	grpcLog, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
+	grpcLog, err := os.OpenFile(conf.LogPath, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644)
 	if err != nil {
-		werr := errors.Wrap(err, fmt.Sprintf("open logfile failed: %v", filename))
+		werr := errors.Wrap(err, fmt.Sprintf("open logfile failed: %v", conf.LogPath))
 		return nil, werr
 	}
 	entry := logrus.New()
 	entry.Formatter = &logrus.JSONFormatter{}
+	//filename，fileno hook
 	hookCaller := caller.NewHook(&caller.CallerHookOptions{
 		Flags:      caller.Llongfile,
 		EnableLine: true,
@@ -39,6 +42,21 @@ func InitGrpcLog(filename string) (*logrus.Entry, error) {
 	entry.Hooks[logrus.InfoLevel] = append(entry.Hooks[logrus.InfoLevel], hookCaller)
 	entry.Out = grpcLog
 
+	//fluent hook
+	hookFluent, err := logrus_fluent.NewWithConfig(logrus_fluent.Config{
+		Host:                conf.FluentHost,
+		Port:                conf.FluentPort,
+		MarshalAsJSON:       true,
+		WriteTimeout:        3 * time.Second,
+		DefaultMessageField: "msg",
+	})
+	if err != nil {
+		werr := errors.Wrap(err, fmt.Sprintf("logrus_fluent.NewWithConfig fail: host: %v, port: %v", conf.FluentHost, conf.FluentPort))
+		return nil, werr
+	}
+	// set static tag
+	hookFluent.SetTag("original.tag")
+	entry.Hooks[logrus.InfoLevel] = append(entry.Hooks[logrus.InfoLevel], hookFluent)
 	log := entry.WithFields(logrus.Fields{
 		"pid": os.Getpid(),
 	})

@@ -1,5 +1,18 @@
 # Changelog
 
+#### Next version (unreleased)
+
+ - Please **don't** use Zstd, as it doesn't work right now.
+   See https://github.com/Shopify/sarama/issues/1252
+
+#### Version 1.23.1 (2019-07-22)
+
+Bug Fixes:
+- Fix fetch delete bug record
+  ([1425](https://github.com/Shopify/sarama/pull/1425)).
+- Handle SASL/OAUTHBEARER token rejection
+  ([1428](https://github.com/Shopify/sarama/pull/1428)).
+
 #### Version 1.23.0 (2019-07-02)
 
 New Features:

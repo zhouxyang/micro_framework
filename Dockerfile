@@ -1,4 +1,4 @@
-FROM golang:1.9.2
+FROM golang:1.12.6
 
 ENV path /go/src/micro_framework
 WORKDIR ${path}

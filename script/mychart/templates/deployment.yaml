@@ -23,6 +23,7 @@ spec:
                 exec:
                   command: ["/bin/sh", "-c", "sh script/pre_stop.sh"]
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.imagePullPolicy }}"
           command: [ "/bin/sh", "-c", "sh  script/start.sh" ]
           ports:
             - name: grpc

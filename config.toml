@@ -8,12 +8,29 @@ ServerName = "MyService"
 EtcdHost="etcd-cluster-client"
 #EtcdHost="127.0.0.1"
 EtcdPort=2379
+#
+#
+#<source>
+#  @type tcp
+#  tag tcp.events # required
+#  <parse>
+#    @type json
+#  </parse>
+#  port 5170   # optional. 5170 by default
+#  bind 0.0.0.0 # optional. 0.0.0.0 by default
+#</source>
+#docker run  -p 5170:5170 -v /tmp/fluent:/fluentd/etc -e FLUENTD_CONF=fluentd.conf fluent/fluentd:v1.6-debian-1
+FluentHost="10.249.155.239"
+FluentPort=5170 
+
 #Zipkin  docker run -d -p 9411:9411 -p 9410:9410 openzipkin/zipkin
 # http://127.0.0.1:9411/zipkin/
 ZipkinHTTPEndpoint="http://10.249.155.239:9411/api/v1/spans"	
 # ConcurrencyLimit服务限流 
 ConcurrencyLimit=10
 
+# Metric打点间隔时间(s)
+MetricTime = 0
 # 日志路径映射到tail -f /tmp/log/micro_framework.log
 LogPath="/tmp/micro_framework.log"
 

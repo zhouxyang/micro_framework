@@ -26,4 +26,5 @@ import:
   subpackages:
   - unix
   - windows
-
+- package: github.com/evalphobia/logrus_fluent
+  version: ^0.5.4

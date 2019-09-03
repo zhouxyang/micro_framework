@@ -16,8 +16,11 @@ type Config struct {
 	LogPath            string
 	EtcdHost           string
 	EtcdPort           int
+	FluentHost         string
+	FluentPort         int
 	ZipkinHTTPEndpoint string
 	ConcurrencyLimit   int64
+	MetricTime         int64
 
 	OrderService struct {
 		OrderDB        string

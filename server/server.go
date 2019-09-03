@@ -100,11 +100,12 @@ func start(filename string, reload bool) error {
 	if err != nil {
 		return err
 	}
-	log, err := cmd.InitGrpcLog(conf.LogPath)
+	log, err := cmd.InitGrpcLog(conf)
 	if err != nil {
 		return err
 	}
-	go metrics.Log(metrics.DefaultRegistry, 5*time.Second, log)
+
+	go metrics.Log(metrics.DefaultRegistry, time.Duration(conf.MetricTime)*time.Second, log)
 	var lis net.Listener
 	if reload {
 		f := os.NewFile(3, "")
