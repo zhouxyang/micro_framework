@@ -48,6 +48,7 @@ func InitGrpcLog(conf *configfile.Config) (*logrus.Entry, error) {
 		Port:                conf.FluentPort,
 		MarshalAsJSON:       true,
 		WriteTimeout:        3 * time.Second,
+		AsyncConnect:        true,
 		DefaultMessageField: "msg",
 	})
 	if err != nil {

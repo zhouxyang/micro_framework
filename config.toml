@@ -19,7 +19,11 @@ EtcdPort=2379
 #  port 5170   # optional. 5170 by default
 #  bind 0.0.0.0 # optional. 0.0.0.0 by default
 #</source>
-#docker run  -p 5170:5170 -v /tmp/fluent:/fluentd/etc -e FLUENTD_CONF=fluentd.conf fluent/fluentd:v1.6-debian-1
+#<match **>
+#@type file
+#  path /fluentd/log/micro_framework
+#</match>
+#docker run  -p 5170:5170 -v /tmp/fluent:/fluentd/etc -v /tmp/log/fluent:/fluentd/log/micro_framework -e FLUENTD_CONF=fluentd.conf fluent/fluentd:v1.6-debian-1
 FluentHost="10.249.155.239"
 FluentPort=5170 
 
