@@ -7,7 +7,6 @@ import (
 	"micro_framework/configfile"
 	"micro_framework/db"
 
-	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
 
@@ -22,7 +21,7 @@ func init() {
 
 // InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
-	myDB, err := gorm.Open("mysql", config.ProductService.ProductDB)
+	myDB, err := db.InitDB(config.ProductService.ProductDB)
 	if err != nil {
 		return err
 	}
@@ -40,7 +39,7 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 
 // ProductServer 自定义服务结构体
 type ProductServer struct {
-	ProductDao *gorm.DB
+	ProductDao *db.MyDB
 	config     *configfile.Config
 }
 
@@ -49,7 +48,7 @@ func (s *ProductServer) GetProduct(ctx context.Context, req *pb.GetProductReques
 	log := cmd.GetLog(ctx)
 	s.ProductDao.SetLogger(log)
 	var product db.Product
-	if err := s.ProductDao.Find(&product, "productid=?", req.ProductID).Error; err != nil {
+	if err := s.ProductDao.Find(ctx, &product, "productid=?", req.ProductID).Error; err != nil {
 		return &pb.ProductResponse{Result: &pb.Result{Code: 5000, Msg: "productid is invalid"}}, err
 	}
 	log.Infof("get product:%+v from db", product)

@@ -6,7 +6,6 @@ import (
 	"micro_framework/configfile"
 	"micro_framework/db"
 
-	"github.com/jinzhu/gorm"
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
@@ -22,7 +21,7 @@ func init() {
 
 // InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
-	myDB, err := gorm.Open("mysql", config.BalanceService.BalanceDB)
+	myDB, err := db.InitDB(config.BalanceService.BalanceDB)
 	if err != nil {
 		return err
 	}
@@ -40,14 +39,15 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 
 // BalanceServer 自定义服务结构体
 type BalanceServer struct {
-	BalanceDao *gorm.DB
+	BalanceDao *db.MyDB
 	config     *configfile.Config
 }
 
 //Deduct 客户端流方式
 func (s *BalanceServer) Deduct(stream pb.Balance_DeductServer) error {
 	balance := decimal.Zero
-	log := cmd.GetLog(stream.Context())
+	ctx := stream.Context()
+	log := cmd.GetLog(ctx)
 	s.BalanceDao.SetLogger(log)
 	for {
 		req, err := stream.Recv()
@@ -70,7 +70,7 @@ func (s *BalanceServer) Deduct(stream pb.Balance_DeductServer) error {
 		}
 		//1. 先查询余额
 		b := db.Balance{}
-		if err := s.BalanceDao.Find(&b, "userid=?", req.UserID).Error; err != nil {
+		if err := s.BalanceDao.Find(ctx, &b, "userid=?", req.UserID).Error; err != nil {
 			log.Infof("s.BalanceDao.GetBalanceByUserID:%v", err)
 			continue
 		}
@@ -92,7 +92,7 @@ func (s *BalanceServer) Deduct(stream pb.Balance_DeductServer) error {
 
 		}
 		b.Balance, _ = decimalBalance.Float64()
-		if err := s.BalanceDao.Save(&b).Error; err != nil {
+		if err := s.BalanceDao.Save(ctx, &b).Error; err != nil {
 			log.Infof("s.Update error:%v", err)
 			continue
 		}

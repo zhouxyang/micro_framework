@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/jinzhu/gorm"
+	//"github.com/jinzhu/gorm"
 	"github.com/satori/go.uuid"
 	"github.com/shopspring/decimal"
 	"google.golang.org/grpc"
@@ -29,7 +29,8 @@ func init() {
 
 // InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
-	myDB, err := gorm.Open("mysql", config.OrderService.OrderDB)
+	//myDB, err := gorm.Open("mysql", config.OrderService.OrderDB)
+	myDB, err := db.InitDB(config.OrderService.OrderDB)
 	if err != nil {
 		return err
 	}
@@ -47,7 +48,7 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 
 // OrderServer 自定义服务结构体
 type OrderServer struct {
-	OrderDao *gorm.DB
+	OrderDao *db.MyDB
 	config   *configfile.Config
 }
 
@@ -192,7 +193,7 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.OrderCreateReques
 					CreateTime: sql.NullTime{Time: time.Now(), Valid: true},
 				}
 				o.ProductPrice, _ = priceDecimal.Float64()
-				if err := s.OrderDao.Create(&o).Error; err != nil {
+				if err := s.OrderDao.Create(ctx, &o).Error; err != nil {
 					log.Infof("Failed to insert order: %v", err)
 					continue
 				}
@@ -234,7 +235,7 @@ func (s *OrderServer) QueryOrder(ctx context.Context, req *pb.OrderQueryRequest)
 	}
 
 	orders := make([]db.Order, 0, 8)
-	if err := s.OrderDao.Find(&orders, "orderid=?", req.OrderID).Error; err != nil {
+	if err := s.OrderDao.Find(ctx, &orders, "orderid=?", req.OrderID).Error; err != nil {
 		return &pb.OrderResponse{Result: &pb.Result{Code: 5004, Msg: "query order error"}}, err
 	}
 	total := decimal.Zero

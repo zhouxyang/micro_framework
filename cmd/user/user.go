@@ -7,7 +7,6 @@ import (
 	//"micro_framework/db/mysql"
 	"micro_framework/db"
 
-	"github.com/jinzhu/gorm"
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
 
@@ -22,7 +21,7 @@ func init() {
 
 // InitServer 初始化MyService服务
 func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
-	myDB, err := gorm.Open("mysql", config.UserService.UserDB)
+	myDB, err := db.InitDB(config.UserService.UserDB)
 	if err != nil {
 		return err
 	}
@@ -41,7 +40,7 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 // UserServer 自定义服务结构体
 type UserServer struct {
 	config  *configfile.Config
-	UserDao *gorm.DB
+	UserDao *db.MyDB
 }
 
 //GetUser 校验用户
@@ -49,7 +48,7 @@ func (s *UserServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.U
 	log := cmd.GetLog(ctx)
 	s.UserDao.SetLogger(log)
 	var user db.User
-	if err := s.UserDao.Find(&user, "userid=?", req.UserID).Error; err != nil {
+	if err := s.UserDao.Find(ctx, &user, "userid=?", req.UserID).Error; err != nil {
 		return &pb.UserResponse{Result: &pb.Result{Code: 5001, Msg: "userid not found"}}, err
 	}
 	log.Infof("get user:%+v from db", req)
