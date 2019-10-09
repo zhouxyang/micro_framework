@@ -1,14 +1,25 @@
 hash: 090bdff92f373cceb124ac41b730a53a0456fd834242a32f3aa4e537f31f4560
-updated: 2019-09-02T19:18:14.397386+08:00
+updated: 2019-10-08T14:57:46.023007+08:00
 imports:
+- name: github.com/afex/hystrix-go
+  version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
+  subpackages:
+  - hystrix
+  - hystrix/metric_collector
+  - hystrix/rolling
+  - plugins
 - name: github.com/apache/thrift
   version: a715f701bf4850b41b7f3fa016d16a9153319e1e
   subpackages:
   - lib/go/thrift
 - name: github.com/BurntSushi/toml
   version: 99064174e013895bbd9b025c31100bd1d9b590ca
+- name: github.com/cactus/go-statsd-client
+  version: 52b467de415c00d80e1f3a3fe574d4cabd41c1b3
+  subpackages:
+  - statsd
 - name: github.com/coreos/etcd
-  version: 898bd1351fcf6e0ebce8d7c8bbbbf3f3e42aa42c
+  version: a14579fbfb1a000439a40abf71862df51b0a2136
   subpackages:
   - clientv3
   - clientv3/naming
@@ -20,6 +31,10 @@ imports:
   version: 399ea9e2e55f791b6e3d920860dbecb99c3692f0
   subpackages:
   - capnslog
+- name: github.com/DataDog/datadog-go
+  version: f6e76752dd64e7329d6b314f92a08748a78c2250
+  subpackages:
+  - statsd
 - name: github.com/DataDog/zstd
   version: 2347a397da4ee9c6b8226d4aff82c302d0e52773
 - name: github.com/davecgh/go-spew
@@ -159,7 +174,7 @@ imports:
 - name: go.uber.org/atomic
   version: df976f2515e274675050de7b3f42545de80594fd
 - name: go.uber.org/multierr
-  version: 3c4937480c32f4c13a875a1829af76c98ca3d40a
+  version: 71e610a0e48dbda460d9c18adca8b5f2de04a7c1
 - name: go.uber.org/zap
   version: 35aad584952c3e7020db7b839f6b102de6271f89
   subpackages:
@@ -202,7 +217,7 @@ imports:
   subpackages:
   - googleapis/rpc/status
 - name: google.golang.org/grpc
-  version: 6eaf6f47437a6b4e2153a190160ef39a92c7eceb
+  version: f6d0f9ee430895e87ef1ceb5ac8f39725bafceef
   subpackages:
   - balancer
   - balancer/base

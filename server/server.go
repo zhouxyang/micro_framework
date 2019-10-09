@@ -19,6 +19,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/naming"
 
+	"github.com/afex/hystrix-go/hystrix/metric_collector"
+	"github.com/afex/hystrix-go/plugins"
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
@@ -137,10 +139,11 @@ func registerEtcd(log *logrus.Entry, conf *configfile.Config) error {
 	r := &etcdnaming.GRPCResolver{Client: cli}
 
 	// 将本服务注册添加etcd
-	err = r.Update(context.TODO(), conf.ServerName, naming.Update{Op: naming.Add, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
-	if err != nil {
-		log.Infof("[测] update etcd err:%v", err)
-		return err
+	for serverName := range cmd.ServerDrivers {
+		err = r.Update(context.TODO(), serverName, naming.Update{Op: naming.Add, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
+		if err != nil {
+			log.Infof("[测] update etcd err:%v", err)
+		}
 	}
 	return nil
 
@@ -155,16 +158,27 @@ func unRegisterEtcd(log *logrus.Entry, conf *configfile.Config) error {
 	// 创建命名解析
 	r := &etcdnaming.GRPCResolver{Client: cli}
 	// 将本服务注册添加etcd中
-	err = r.Update(context.TODO(), conf.ServerName, naming.Update{Op: naming.Delete, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
-	if err != nil {
-		log.Infof("update etcd err:%v", err)
-		return err
+	for serverName := range cmd.ServerDrivers {
+		err = r.Update(context.TODO(), serverName, naming.Update{Op: naming.Delete, Addr: fmt.Sprintf("%s:%d", conf.Host, conf.Port)})
+		if err != nil {
+			log.Infof("update etcd err:%v", err)
+			return err
+		}
 	}
 	return nil
 
 }
 
 func startServer(log *logrus.Entry, lis net.Listener, conf *configfile.Config) {
+	collec, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
+		StatsdAddr: conf.StatsdAddr,
+		Prefix:     "myapp.hystrix",
+	})
+	if err != nil {
+		log.Fatalf("could not initialize statsd client: %v", err)
+	}
+	metricCollector.Registry.Register(collec.NewStatsdCollector)
+
 	limit := &ratelimit.Limiter{Counter: concurrency, Meter: qpsRate, Limit: conf.ConcurrencyLimit}
 	// 配置zipkin地址
 	collector, err := zipkin.NewHTTPCollector(conf.ZipkinHTTPEndpoint)

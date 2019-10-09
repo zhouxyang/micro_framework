@@ -7,6 +7,7 @@ import (
 	"micro_framework/configfile"
 	"micro_framework/db"
 
+	"github.com/afex/hystrix-go/hystrix"
 	"google.golang.org/grpc"
 	//	"google.golang.org/grpc/reflection"
 
@@ -34,6 +35,14 @@ func InitServer(grpcServer *grpc.Server, config *configfile.Config) error {
 	pb.RegisterProductServer(grpcServer, srv)
 	// Register reflection service on gRPC server.
 	//	reflection.Register(grpcServer)
+	//熔断器设置
+	hystrix.ConfigureCommand("ProductService", hystrix.CommandConfig{
+		Timeout:                1 * 1000, //超时
+		MaxConcurrentRequests:  10,       //最大并发的请求数
+		RequestVolumeThreshold: 5,        //请求量阈值
+		SleepWindow:            3 * 1000, //熔断开启多久尝试发起一次请求
+		ErrorPercentThreshold:  1,        //误差阈值百分比
+	})
 	return nil
 }
 

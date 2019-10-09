@@ -22,6 +22,7 @@ import (
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	//grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	grpc_requestid "micro_framework/middleware/grpc_requestid"
+	grpc_hystrix "micro_framework/middleware/hystrix"
 )
 
 func InitGrpcLog(conf *configfile.Config) (*logrus.Entry, error) {
@@ -100,6 +101,7 @@ func GetGrpcConnByEtcd(ctx context.Context, service string, cli *clientv3.Client
 				//grpc_retry.UnaryClientInterceptor(grpc_retry.WithMax(3)),
 				//grpc_requestid.UnaryClientInterceptor(log),
 				grpc_opentracing.UnaryClientInterceptor(),
+				grpc_hystrix.UnaryClientInterceptor(service),
 			),
 		),
 		grpc.WithStreamInterceptor(
@@ -108,6 +110,7 @@ func GetGrpcConnByEtcd(ctx context.Context, service string, cli *clientv3.Client
 				//grpc_retry.StreamClientInterceptor(grpc_retry.WithMax(3)),
 				//grpc_requestid.StreamClientInterceptor(log),
 				grpc_opentracing.StreamClientInterceptor(),
+				grpc_hystrix.StreamClientInterceptor(log, service),
 			),
 		),
 	)

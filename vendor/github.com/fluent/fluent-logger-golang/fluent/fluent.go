@@ -236,14 +236,12 @@ func (chunk *MessageChunk) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	/*option, err := json.Marshal(chunk.message.Option)
+	option, err := json.Marshal(chunk.message.Option)
 	if err != nil {
 		return nil, err
 	}
 	return []byte(fmt.Sprintf("[\"%s\",%d,%s,%s]", chunk.message.Tag,
 		chunk.message.Time, data, option)), err
-	*/
-	return data, err
 }
 
 // getUniqueID returns a base64 encoded unique ID that can be used for chunk/ack
@@ -386,12 +384,10 @@ func (f *Fluent) write(msg *msgToSend) error {
 		} else {
 			c.SetWriteDeadline(time.Time{})
 		}
-		fmt.Println("before write", string(msg.data))
 		_, err := c.Write(msg.data)
 		if err != nil {
 			f.close(c)
 		} else {
-			_, err = c.Write([]byte("\r\n"))
 			// Acknowledgment check
 			if msg.ack != "" {
 				resp := &AckResp{}
@@ -410,5 +406,6 @@ func (f *Fluent) write(msg *msgToSend) error {
 			return err
 		}
 	}
+
 	return fmt.Errorf("fluent#write: failed to reconnect, max retry: %v", f.Config.MaxRetry)
 }

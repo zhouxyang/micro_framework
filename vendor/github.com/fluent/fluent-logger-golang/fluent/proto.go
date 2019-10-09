@@ -25,7 +25,7 @@ type Forward struct {
 type Message struct {
 	Tag    string      `msg:"tag"`
 	Time   int64       `msg:"time"`
-	Record interface{} `msg:"record,omitempty"`
+	Record interface{} `msg:"record"`
 	Option map[string]string
 }
 

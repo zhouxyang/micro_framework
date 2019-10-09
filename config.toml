@@ -31,12 +31,17 @@ FluentPort=5170
 # http://127.0.0.1:9411/zipkin/
 ZipkinHTTPEndpoint="http://10.249.155.239:9411/api/v1/spans"	
 # ConcurrencyLimit服务限流 
-ConcurrencyLimit=10
+ConcurrencyLimit=10000
 
 # Metric打点间隔时间(s)
 MetricTime = 0
 # 日志路径映射到tail -f /tmp/log/micro_framework.log
 LogPath="/tmp/micro_framework.log"
+
+# statsd
+# docker run -p 8125:8125/udp  -p 8126:8126/tcp --name statsd -d dockerana/statsd
+StatsdAddr = "10.249.155.239:8125"
+
 
 [UserService] 
 	# 数据库配置
@@ -54,8 +59,8 @@ LogPath="/tmp/micro_framework.log"
 	# 数据库配置
 	OrderDB = "root:test@tcp(mysql-svc:3306)/grpc?charset=utf8&parseTime=true&loc=Local&timeout=3s"
 	# 用户管理  单集群时为上面的ServerName，多集群时为域名
-	UserService = "MyService"
+	UserService = "UserService"
 	# 商品管理,集群时为上面的ServerName，多集群时为域名
-	ProductService = "MyService"
+	ProductService = "ProductService"
 	# 结算管理,集群时为上面的ServerName，多集群时为域名
-	BalanceService = "MyService"
+	BalanceService = "BalanceService"

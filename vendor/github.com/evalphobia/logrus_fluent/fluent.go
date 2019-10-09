@@ -91,6 +91,7 @@ func NewWithConfig(conf Config) (*FluentHook, error) {
 	for k, v := range conf.DefaultFilters {
 		hook.filters[k] = v
 	}
+
 	return hook, nil
 }
 
@@ -165,6 +166,7 @@ func (hook *FluentHook) Fire(entry *logrus.Entry) error {
 		}
 		defer logger.Close()
 	}
+
 	// Create a map for passing to FluentD
 	data := make(logrus.Fields)
 	for k, v := range entry.Data {

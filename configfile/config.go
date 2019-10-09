@@ -19,6 +19,7 @@ type Config struct {
 	FluentHost         string
 	FluentPort         int
 	ZipkinHTTPEndpoint string
+	StatsdAddr         string
 	ConcurrencyLimit   int64
 	MetricTime         int64
 
