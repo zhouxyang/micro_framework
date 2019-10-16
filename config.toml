@@ -33,8 +33,12 @@ ZipkinHTTPEndpoint="http://10.249.155.239:9411/api/v1/spans"
 # ConcurrencyLimit服务限流 
 ConcurrencyLimit=10000
 
+#prometheus docker run -p 9090:9090 -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml  prom/prometheus
+#pushgateway docker run -d -p 9091:9091 prom/pushgateway
+# PrometheusPushGateWay Prometheus网关地址
+PrometheusPushGateWay = "http://10.249.155.239:9091" 
 # Metric打点间隔时间(s)
-MetricTime = 0
+MetricTime = 5
 # 日志路径映射到tail -f /tmp/log/micro_framework.log
 LogPath="/tmp/micro_framework.log"
 

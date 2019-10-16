@@ -22,12 +22,15 @@ import (
 	"github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
 	etcdnaming "github.com/coreos/etcd/clientv3/naming"
+	goprometheus "github.com/deathowl/go-metrics-prometheus"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	"github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"github.com/opentracing/opentracing-go"
 	zipkin "github.com/openzipkin-contrib/zipkin-go-opentracing"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/push"
 	"github.com/rcrowley/go-metrics"
 	ratelimit "micro_framework/middleware/ratelimit"
 	requestdump "micro_framework/middleware/requestdump"
@@ -107,7 +110,8 @@ func start(filename string, reload bool) error {
 		return err
 	}
 
-	go metrics.Log(metrics.DefaultRegistry, time.Duration(conf.MetricTime)*time.Second, log)
+	//go metrics.Log(metrics.DefaultRegistry, time.Duration(conf.MetricTime)*time.Second, log)
+	go pushPrometheus(conf, log)
 	var lis net.Listener
 	if reload {
 		f := os.NewFile(3, "")
@@ -271,4 +275,27 @@ func reload(listener net.Listener) error {
 	// put socket FD at the first entry
 	cmd.ExtraFiles = []*os.File{f}
 	return cmd.Start()
+}
+
+func pushPrometheus(conf *configfile.Config, log *logrus.Entry) {
+	// init metrics registry
+	metricsRegistry := metrics.DefaultRegistry
+	metrics.RegisterDebugGCStats(metricsRegistry)
+	metrics.RegisterRuntimeMemStats(metricsRegistry)
+	prometheusRegistry := prometheus.NewRegistry()
+
+	// update info in metrics registry
+	go metrics.CaptureDebugGCStats(metricsRegistry, time.Duration(conf.MetricTime)*time.Second)
+	go metrics.CaptureRuntimeMemStats(metricsRegistry, time.Duration(conf.MetricTime)*time.Second)
+	// init and sync info to prometheus registry
+	pClient := goprometheus.NewPrometheusProvider(metricsRegistry, "micro_framework", "go-metrics", prometheusRegistry, time.Duration(conf.MetricTime)*time.Second)
+	go pClient.UpdatePrometheusMetrics()
+
+	pusher := push.New(conf.PrometheusPushGateWay, "metrics").Gatherer(prometheusRegistry)
+	for _ = range time.Tick(time.Duration(conf.MetricTime) * time.Second) {
+		if err := pusher.Add(); err != nil {
+			log.Warnf("Could not push to Pushgateway:%v", err)
+		}
+	}
+	return
 }

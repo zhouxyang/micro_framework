@@ -36,4 +36,16 @@
 
 ## 服务治理
 1. 需要提供日志串联功能，需要有服务发现功能，需要有集群状态,server性能实时监控告警功能，同时也有故障现场保存功能
-2. 需要实现服务熔断，降级，限流，由于istio的性能开销问题，暂不考虑，准备由程序实现
+2. 需要实现服务熔断，降级，限流，由于istio的性能开销问题，暂不考虑，由go-histrix实现
+
+# 相关项目
+- [afex/hystrix-go](https://github.com/afex/hystrix-go), go实现的熔断器
+- [armon/go-metrics](https://github.com/armon/go-metrics), 服务监控指标(metric)上报
+- [grpc/grpc-go](https://github.com/grpc/grpc-go), 基于HTTP/2, protobuf实现的rpc框架
+- [sirupsen/logrus](https://github.com/sirupsen/logrus), 结构化日志框架
+- [kubernetes/kubernetes](https://github.com/kubernetes/kubernetes),一个用于容器集群的自动化部署、扩容以及运维的开源平台
+- [jinzhu/gorm](https://github.com/jinzhu/gorm) golang 数据库orm库
+- [opentracing/opentracing-go](https://github.com/opentracing/opentracing-go) 开放分布式追踪协议go版本
+- [etcd-io/etcd](https://github.com/etcd-io/etcd) 一个分布式键值对存储系统，可用于服务发现
+- [fluent/fluentd](https://github.com/fluent/fluentd) 日志收集器
+

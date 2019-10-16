@@ -9,19 +9,20 @@ import (
 
 // Config 全局配置文件
 type Config struct {
-	Host               string
-	Port               int
-	ServerName         string
-	ServerID           int
-	LogPath            string
-	EtcdHost           string
-	EtcdPort           int
-	FluentHost         string
-	FluentPort         int
-	ZipkinHTTPEndpoint string
-	StatsdAddr         string
-	ConcurrencyLimit   int64
-	MetricTime         int64
+	Host                  string
+	Port                  int
+	ServerName            string
+	ServerID              int
+	LogPath               string
+	EtcdHost              string
+	EtcdPort              int
+	FluentHost            string
+	FluentPort            int
+	ZipkinHTTPEndpoint    string
+	StatsdAddr            string
+	ConcurrencyLimit      int64
+	MetricTime            int64
+	PrometheusPushGateWay string
 
 	OrderService struct {
 		OrderDB        string

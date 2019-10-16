@@ -1,5 +1,5 @@
 hash: 090bdff92f373cceb124ac41b730a53a0456fd834242a32f3aa4e537f31f4560
-updated: 2019-10-08T14:57:46.023007+08:00
+updated: 2019-10-15T18:30:32.480713+08:00
 imports:
 - name: github.com/afex/hystrix-go
   version: fa1af6a1f4f56e0e50d427fe901cd604d8c6fb8a
@@ -12,6 +12,10 @@ imports:
   version: a715f701bf4850b41b7f3fa016d16a9153319e1e
   subpackages:
   - lib/go/thrift
+- name: github.com/beorn7/perks
+  version: 3a771d992973f24aa725d07868b467d1ddfceafb
+  subpackages:
+  - quantile
 - name: github.com/BurntSushi/toml
   version: 99064174e013895bbd9b025c31100bd1d9b590ca
 - name: github.com/cactus/go-statsd-client
@@ -19,7 +23,7 @@ imports:
   subpackages:
   - statsd
 - name: github.com/coreos/etcd
-  version: a14579fbfb1a000439a40abf71862df51b0a2136
+  version: bbe86b066c0c714fa2a17ee93a37882553cf2394
   subpackages:
   - clientv3
   - clientv3/naming
@@ -41,6 +45,8 @@ imports:
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
   - spew
+- name: github.com/deathowl/go-metrics-prometheus
+  version: 091131e49c335a452af504b8104ac262da41a6e9
 - name: github.com/eapache/go-resiliency
   version: b98ce2825f7276cc41027348986a241ef5d62fd8
   subpackages:
@@ -109,6 +115,10 @@ imports:
   version: f5c5f50e6090ae76a29240b61ae2a90dd810112e
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  subpackages:
+  - pbutil
 - name: github.com/opentracing-contrib/go-observer
   version: a52f2342449246d5bcc273e65cbdcfa5f7d6c63c
 - name: github.com/opentracing/opentracing-go
@@ -132,6 +142,27 @@ imports:
   - internal/xxh32
 - name: github.com/pkg/errors
   version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
+- name: github.com/prometheus/client_golang
+  version: bcbbc08eb2ddff3af83bbf11e7ec13b4fd730b6e
+  subpackages:
+  - prometheus
+  - prometheus/push
+- name: github.com/prometheus/client_model
+  version: 5c3871d89910bfb32f5fcab2aa4b9ec68e65a99f
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: 7600349dcfe1abd18d72d3a1770870d9800a7801
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: 05ee40e3a273f7245e8777337fc7b46e533a9a92
+  subpackages:
+  - internal/util
+  - nfs
+  - xfs
 - name: github.com/rcrowley/go-metrics
   version: e2704e165165ec55d062f5919b4b29494e9fa790
 - name: github.com/satori/go.uuid
