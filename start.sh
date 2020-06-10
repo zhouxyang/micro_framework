@@ -12,7 +12,6 @@ function init_mysql(){
 }
 
 function init_etcd(){
-	kubectl create -f script/etcd/hazelcast-rbac.yaml
     kubectl create -f script/etcd/etcd-deployment.yaml 
     kubectl create -f script/etcd/etcd-client-service-lb.yaml
     kubectl create -f script/etcd/etcd-cluster.yaml
@@ -33,7 +32,6 @@ function destory_etcd(){
     kubectl delete -f script/etcd/etcd-cluster.yaml
     kubectl delete -f script/etcd/etcd-deployment.yaml 
     kubectl delete -f script/etcd/etcd-client-service-lb.yaml
-	kubectl delete -f script/etcd/hazelcast-rbac.yaml
 }
 
 function start(){
